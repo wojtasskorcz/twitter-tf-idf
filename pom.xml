@@ -16,7 +16,7 @@
 	
 	<distributionManagement>
 		<site>
-		  <id>twitter-tf-idf/id>
+		  <id>twitter-tf-idf</id>
 		  <url>file:/var/www/twitter-tf-idf/</url>
 		</site>
 	</distributionManagement>
