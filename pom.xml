@@ -13,13 +13,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
-	
-	<distributionManagement>
-		<site>
-		  <id>twitter-tf-idf</id>
-		  <url>file:/var/www/twitter-tf-idf/</url>
-		</site>
-	</distributionManagement>
 
 	<repositories>
 		<repository>
