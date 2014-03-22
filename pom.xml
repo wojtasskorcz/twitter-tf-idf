@@ -40,6 +40,7 @@
 				<reportSets>
 					<reportSet>
 						<reports>
+							<report>index</report>
 							<report>project-team</report>
 							<report>summary</report>
 							<report>dependencies</report>
