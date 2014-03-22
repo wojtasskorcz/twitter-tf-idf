@@ -32,6 +32,7 @@ public class TwitterSpout extends BaseRichSpout {
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		System.out.println("opening");
+		this.collector = collector;
 		queue = new LinkedBlockingQueue<Status>(1000);
 
 		StatusListener listener = new StatusListener() {
@@ -86,7 +87,6 @@ public class TwitterSpout extends BaseRichSpout {
 		} else {
 			collector.emit(new Values(ret));
 		}
-
 	}
 
 	@Override
