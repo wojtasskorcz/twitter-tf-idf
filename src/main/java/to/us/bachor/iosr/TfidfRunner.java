@@ -6,39 +6,25 @@ import storm.trident.testing.FixedBatchSpout;
 import to.us.bachor.iosr.function.DocumentFetchFunction;
 import to.us.bachor.iosr.function.DocumentTokenizer;
 import to.us.bachor.iosr.function.TermFilter;
-import to.us.bachor.iosr.spout.TwitterSpout;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.LocalDRPC;
-import backtype.storm.StormSubmitter;
-import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
-public class TfidfTopology {
+/**
+ * Builds a Topology that receives a stream of links to documents, fetches content of those documents, stems and filters
+ * dictionary words from those documents and then computes D, DF and TF factors of tf-idf. Then submits this Topology to
+ * Storm.
+ * 
+ * Not yet finished: Should use Redis values gathered by TwitterScraperRunner. Uses a mock FixedBatchSpout so far.
+ * Computing of D, DF and TF not yet implemented.
+ */
+public class TfidfRunner {
 
 	private static String[] mimeTypes = new String[] { "text/html", "text/plain" };
 
 	public static void main(String[] args) throws Exception {
-		// please uncomment and run only one of the methods specified below
-		// runTwitterStreamTopology(args);
-		runMockDocumentTopology(args);
-	}
-
-	private static void runTwitterStreamTopology(String[] args) throws Exception {
-		TopologyBuilder builder = new TopologyBuilder();
-		builder.setSpout("iphoneTweetsSpout", new TwitterSpout(new String[] { "iphone" }, 1000));
-		Config conf = new Config();
-		if (args != null && args.length > 0) {
-			conf.setNumWorkers(3);
-			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
-		} else {
-			LocalCluster cluster = new LocalCluster();
-			cluster.submitTopology("twitterStreamTopology", conf, builder.createTopology());
-		}
-	}
-
-	private static void runMockDocumentTopology(String[] args) throws Exception {
 		Config conf = new Config();
 		if (args.length == 0) {
 			LocalDRPC drpc = new LocalDRPC();
