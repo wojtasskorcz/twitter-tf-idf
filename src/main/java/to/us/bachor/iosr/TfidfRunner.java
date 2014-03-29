@@ -113,6 +113,7 @@ public class TfidfRunner {
 				.project(new Fields("term", "df"));
 
 		// gets: args (a string in form <documentId><space><term>)
+		// returns: documentId (document's url), term, tfidf
 		topology.newDRPCStream("tfidfQuery", drpc)
 				.each(new Fields("args"), new SplitAndProjectToFields(), new Fields("documentId", "term"))
 				.each(new Fields(), new AddSourceField("twitter"), new Fields("source"))
