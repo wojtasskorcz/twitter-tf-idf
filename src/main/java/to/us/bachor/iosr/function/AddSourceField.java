@@ -5,16 +5,16 @@ import storm.trident.operation.TridentCollector;
 import storm.trident.tuple.TridentTuple;
 import backtype.storm.tuple.Values;
 
-public class NullToZeroFunction extends BaseFunction {
+public class AddSourceField extends BaseFunction {
+	private String source;
+
+	public AddSourceField(String source) {
+		this.source = source;
+	}
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		Long val = tuple.getLong(0);
-		if (val == null) {
-			collector.emit(new Values(0));
-		} else {
-			collector.emit(new Values(val));
-		}
+		collector.emit(new Values(source));
 	}
 
 }

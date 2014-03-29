@@ -1,22 +1,26 @@
 package to.us.bachor.iosr;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import storm.trident.Stream;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.operation.builtin.Count;
-import storm.trident.operation.builtin.MapGet;
 import storm.trident.testing.FixedBatchSpout;
 import storm.trident.testing.MemoryMapState;
 import storm.trident.testing.Split;
+import to.us.bachor.iosr.function.AddSourceField;
 import to.us.bachor.iosr.function.DocumentFetchFunction;
 import to.us.bachor.iosr.function.DocumentTokenizer;
-import to.us.bachor.iosr.function.NullToZeroFunction;
+import to.us.bachor.iosr.function.MapGetNoNulls;
+import to.us.bachor.iosr.function.SplitAndProjectToFields;
 import to.us.bachor.iosr.function.TermFilter;
+import to.us.bachor.iosr.function.TfidfExpression;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.LocalDRPC;
 import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
 
 /**
  * Builds a Topology that receives a stream of links to documents, fetches content of those documents, stems and filters
@@ -29,6 +33,7 @@ import backtype.storm.tuple.Values;
 public class TfidfRunner {
 
 	private static String[] mimeTypes = new String[] { "text/html", "text/plain" };
+	private static String[] urls = new String[] { "http://t.co/hP5PM6fm"/* , "http://t.co/xSFteG23" */};
 
 	public static void main(String[] args) throws Exception {
 		Config conf = new Config();
@@ -38,8 +43,9 @@ public class TfidfRunner {
 			TridentTopology topology = buildMockDocumentTopology(drpc);
 			cluster.submitTopology("mockDocumentTopology", conf, topology.build());
 			for (int i = 0; i < 100; i++) {
-				System.out.println("dQuery(twitter): " + drpc.execute("dQuery", "twitter"));
-				System.out.println("dfQuery" + drpc.execute("dfQuery", "have your dupa"));
+				// System.out.println("dQuery " + drpc.execute("dQuery", "twitter"));
+				// System.out.println("dfQuery " + drpc.execute("dfQuery", "have your dupa"));
+				System.out.println("tfidfQuery " + drpc.execute("tfidfQuery", urls[0] + " have"));
 				Thread.sleep(1000);
 			}
 		}
@@ -47,57 +53,74 @@ public class TfidfRunner {
 
 	private static TridentTopology buildMockDocumentTopology(LocalDRPC drpc) {
 		TridentTopology topology = new TridentTopology();
-		// FixedBatchSpout testSpout = new FixedBatchSpout(new Fields("url"), 1, new Values("http://t.co/hP5PM6fm"),
-		// new Values("http://t.co/xSFteG23"));
 
 		// emits: url
-		FixedBatchSpout testSpout = new FixedBatchSpout(new Fields("url"), 1, new Values("http://t.co/hP5PM6fm"));
+		FixedBatchSpout testSpout = new FixedBatchSpout(new Fields("url"), 1,
+				new ArrayList<Object>(Arrays.asList(urls)));
+
+		/* ================================ streams ================================ */
 
 		// gets: url
-		// emits: url, document (actual content), documentId (trimmed url), source (here: "twitter")
+		// emits: url, document (actual content), documentId (document's url), source (here: "twitter")
 		Stream documentStream = topology //
 				.newStream("tweetSpout", testSpout) //
 				.parallelismHint(20) //
 				.each(new Fields("url"), new DocumentFetchFunction(mimeTypes),
 						new Fields("document", "documentId", "source"));
 
-		// gets: url, document (actual content), documentId (trimmed url), source (here: "twitter")
-		// emits: term (lemmatized), documentId (trimmed url), source (here: "twitter")
+		// gets: url, document (actual content), documentId (document's url), source (here: "twitter")
+		// emits: term (lemmatized), documentId (document's url), source (here: "twitter")
 		Stream termStream = documentStream //
 				.parallelismHint(20) //
 				.each(new Fields("document"), new DocumentTokenizer(), new Fields("dirtyTerm")) //
 				.each(new Fields("dirtyTerm"), new TermFilter(), new Fields("term")) //
 				.project(new Fields("term", "documentId", "source"));
 
-		// gets: url, document (actual content), documentId (trimmed url), source (here: "twitter")
+		/* ================================ states ================================ */
+
+		// gets: url, document (actual content), documentId (document's url), source (here: "twitter")
+		// contains: d (total number of documents from this source)
 		TridentState dState = documentStream //
 				.groupBy(new Fields("source")) //
 				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields("d"));
 
-		// gets: term (lemmatized), documentId (trimmed url), source (here: "twitter")
+		// gets: term (lemmatized), documentId (document's url), source (here: "twitter")
+		// contains: df (number of appearances of the term in all documents)
 		TridentState dfState = termStream //
 				.groupBy(new Fields("term")) //
 				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields("df"));
+
+		// gets: documentId (document's url), term (lemmatized)
+		// contains: tf (number of appearances of the term in the document)
+		TridentState tfState = termStream //
+				.groupBy(new Fields("documentId", "term")) //
+				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields("tf"));
+
+		/* ================================ DRPC streams ================================ */
 
 		// gets: args (space-separated list of sources)
 		// returns: source, d (the D factor of tf-idf for this source)
 		topology.newDRPCStream("dQuery", drpc) //
 				.each(new Fields("args"), new Split(), new Fields("source")) //
-				.stateQuery(dState, new Fields("source"), new MapGet(), new Fields("tmpD")) //
-				.each(new Fields("tmpD"), new NullToZeroFunction(), new Fields("d")) //
+				.stateQuery(dState, new Fields("source"), new MapGetNoNulls(), new Fields("d")) //
 				.project(new Fields("source", "d"));
 
 		// gets: args (space-separated list of terms)
 		// returns: term, df (the DF factor of tf-idf for this term)
 		topology.newDRPCStream("dfQuery", drpc) //
 				.each(new Fields("args"), new Split(), new Fields("term")) //
-				.stateQuery(dfState, new Fields("term"), new MapGet(), new Fields("tmpDf")) //
-				.each(new Fields("tmpDf"), new NullToZeroFunction(), new Fields("df")) //
+				.stateQuery(dfState, new Fields("term"), new MapGetNoNulls(), new Fields("df")) //
 				.project(new Fields("term", "df"));
 
-		// Stream tfidfStream = termStream.groupBy(new Fields("documentId", "term"))
-		// .aggregate(new Count(), new Fields("tf"))
-		// .each(new Fields("term", "documentId", "tf"), new TfidfExpression(), new Fields("tfidf"));
+		// gets: args (a string in form <documentId><space><term>)
+		topology.newDRPCStream("tfidfQuery", drpc)
+				.each(new Fields("args"), new SplitAndProjectToFields(), new Fields("documentId", "term"))
+				.each(new Fields(), new AddSourceField("twitter"), new Fields("source"))
+				.stateQuery(dState, new Fields("source"), new MapGetNoNulls(), new Fields("d"))
+				.stateQuery(dfState, new Fields("term"), new MapGetNoNulls(), new Fields("df"))
+				.stateQuery(tfState, new Fields("documentId", "term"), new MapGetNoNulls(), new Fields("tf"))
+				.each(new Fields("term", "documentId", "d", "df", "tf"), new TfidfExpression(), new Fields("tfidf")) //
+				.project(new Fields("documentId", "term", "tfidf"));
 
 		return topology;
 	}
