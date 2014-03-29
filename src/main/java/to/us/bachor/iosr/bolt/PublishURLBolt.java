@@ -3,6 +3,7 @@ package to.us.bachor.iosr.bolt;
 import java.util.Map;
 
 import redis.clients.jedis.Jedis;
+import to.us.bachor.iosr.Config;
 import twitter4j.Status;
 import twitter4j.URLEntity;
 import backtype.storm.task.OutputCollector;
@@ -26,7 +27,7 @@ public class PublishURLBolt extends BaseRichBolt {
 		URLEntity[] urls = ret.getURLEntities();
 		for (int i = 0; i < urls.length; i++) {
 			System.out.println("saving: " + urls[i].getURL().trim());
-			jedis.rpush("urls", urls[i].getURL().trim());
+			jedis.rpush(Config.REDIS_URLS_KEY, urls[i].getURL().trim());
 		}
 	}
 
