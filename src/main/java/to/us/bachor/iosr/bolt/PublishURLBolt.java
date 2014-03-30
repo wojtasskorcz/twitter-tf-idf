@@ -2,6 +2,8 @@ package to.us.bachor.iosr.bolt;
 
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import redis.clients.jedis.Jedis;
 import to.us.bachor.iosr.Config;
 import twitter4j.Status;
@@ -16,6 +18,7 @@ import backtype.storm.tuple.Tuple;
 public class PublishURLBolt extends BaseRichBolt {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(PublishURLBolt.class);
 
 	private Jedis jedis;
 
@@ -29,7 +32,7 @@ public class PublishURLBolt extends BaseRichBolt {
 		Status ret = (Status) input.getValue(0);
 		URLEntity[] urls = ret.getURLEntities();
 		for (int i = 0; i < urls.length; i++) {
-			System.out.println("saving: " + urls[i].getURL().trim());
+			logger.debug("saving: " + urls[i].getURL().trim());
 			jedis.rpush(Config.REDIS_URLS_KEY, urls[i].getURL().trim());
 		}
 	}
