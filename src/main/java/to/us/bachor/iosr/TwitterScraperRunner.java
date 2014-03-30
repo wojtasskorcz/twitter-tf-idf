@@ -1,5 +1,6 @@
 package to.us.bachor.iosr;
 
+import static to.us.bachor.iosr.TopologyNames.*;
 import to.us.bachor.iosr.bolt.PublishURLBolt;
 import to.us.bachor.iosr.spout.TwitterSpout;
 import backtype.storm.Config;
@@ -19,15 +20,15 @@ public class TwitterScraperRunner {
 
 	public static void main(String[] args) throws Exception {
 		TopologyBuilder builder = new TopologyBuilder();
-		builder.setSpout("twitterSpout", new TwitterSpout(keywords, 1000));
-		builder.setBolt("publishBolt", new PublishURLBolt(), 2).shuffleGrouping("twitterSpout");
+		builder.setSpout(TWITTER_SPOUT, new TwitterSpout(keywords, 1000));
+		builder.setBolt(PUBLISH_URL_BOLT, new PublishURLBolt(), 2).shuffleGrouping(TWITTER_SPOUT);
 		Config conf = new Config();
 		if (args != null && args.length > 0) {
 			conf.setNumWorkers(3);
 			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
 		} else {
 			LocalCluster cluster = new LocalCluster();
-			cluster.submitTopology("twitterStreamTopology", conf, builder.createTopology());
+			cluster.submitTopology(TWITTER_STREAM_TOPOLOGY, conf, builder.createTopology());
 		}
 	}
 
