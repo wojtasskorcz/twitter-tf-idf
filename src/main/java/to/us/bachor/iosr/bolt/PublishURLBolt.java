@@ -5,7 +5,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import redis.clients.jedis.Jedis;
-import to.us.bachor.iosr.Config;
+import to.us.bachor.iosr.Settings;
 import twitter4j.Status;
 import twitter4j.URLEntity;
 import backtype.storm.task.OutputCollector;
@@ -21,10 +21,12 @@ public class PublishURLBolt extends BaseRichBolt {
 	private static final Logger logger = Logger.getLogger(PublishURLBolt.class);
 
 	private Jedis jedis;
+	private Settings settings = Settings.getSettings();
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		jedis = new Jedis("localhost");
+		jedis = new Jedis(settings.getProperty(Settings.Key.REDIS_HOST),
+				settings.getIntegerProperty(Settings.Key.REDIS_PORT));
 	}
 
 	@Override
@@ -33,7 +35,7 @@ public class PublishURLBolt extends BaseRichBolt {
 		URLEntity[] urls = ret.getURLEntities();
 		for (int i = 0; i < urls.length; i++) {
 			logger.debug("saving: " + urls[i].getURL().trim());
-			jedis.rpush(Config.REDIS_URLS_KEY, urls[i].getURL().trim());
+			jedis.rpush(Settings.REDIS_URLS_KEY, urls[i].getURL().trim());
 		}
 	}
 

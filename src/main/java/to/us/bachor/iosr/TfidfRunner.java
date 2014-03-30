@@ -45,8 +45,6 @@ public class TfidfRunner {
 			TridentTopology topology = buildMockDocumentTopology(drpc);
 			cluster.submitTopology("mockDocumentTopology", conf, topology.build());
 			for (int i = 0; i < 100; i++) {
-				// System.out.println("dQuery " + drpc.execute("dQuery", "twitter"));
-				// System.out.println("dfQuery " + drpc.execute("dfQuery", "have your dupa"));
 				System.out.println("tfidfQuery " + drpc.execute("tfidfQuery", urls[0] + " have"));
 				Thread.sleep(1000);
 			}
