@@ -35,7 +35,9 @@ public class TermFilter extends BaseFunction {
 	@Override
 	public void prepare(Map conf, TridentOperationContext context) {
 		super.prepare(conf, context);
-		File dir = new File(settings.getProperty(Key.TEMPORARY_DIRECTORY) + "/dictionaries");
+		logger.debug("Preparing TermFilter");
+		File dir = new File(settings.getProperty(Key.TEMPORARY_DIRECTORY) + "/dictionaries"
+				+ System.currentTimeMillis());
 		Directory directory;
 		try {
 			directory = FSDirectory.open(dir);
@@ -47,6 +49,7 @@ public class TermFilter extends BaseFunction {
 		} catch (Exception e) {
 			System.err.println(e.toString());
 		}
+		logger.debug("Preparing TermFilter Finished");
 	}
 
 	@Override
