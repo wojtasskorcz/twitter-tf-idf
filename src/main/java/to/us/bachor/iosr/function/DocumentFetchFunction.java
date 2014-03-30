@@ -19,6 +19,8 @@ import backtype.storm.tuple.Values;
 
 public class DocumentFetchFunction extends BaseFunction {
 
+	private static final long serialVersionUID = 1L;
+
 	private List<String> mimeTypes;
 
 	public DocumentFetchFunction(String[] supportedMimeTypes) {

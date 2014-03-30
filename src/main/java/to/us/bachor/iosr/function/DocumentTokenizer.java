@@ -18,6 +18,8 @@ import edu.washington.cs.knowitall.morpha.MorphaStemmer;
 
 public class DocumentTokenizer extends BaseFunction {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
 		System.out.println("tokenizer starts");

@@ -6,6 +6,8 @@ import storm.trident.tuple.TridentTuple;
 import backtype.storm.tuple.Values;
 
 public class AddSourceField extends BaseFunction {
+	private static final long serialVersionUID = 1L;
+
 	private String source;
 
 	public AddSourceField(String source) {

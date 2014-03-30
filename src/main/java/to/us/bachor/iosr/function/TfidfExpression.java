@@ -7,6 +7,8 @@ import backtype.storm.tuple.Values;
 
 public class TfidfExpression extends BaseFunction {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
 		try {

@@ -8,7 +8,10 @@ import storm.trident.state.map.ReadOnlyMapState;
 import storm.trident.tuple.TridentTuple;
 import backtype.storm.tuple.Values;
 
+@SuppressWarnings({ "unchecked", "rawtypes" } /* Storm has no generic types */)
 public class MapGetNoNulls extends BaseQueryFunction<ReadOnlyMapState, Object> {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public List<Object> batchRetrieve(ReadOnlyMapState map, List<TridentTuple> keys) {

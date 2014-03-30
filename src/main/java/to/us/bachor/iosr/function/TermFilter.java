@@ -19,7 +19,10 @@ import storm.trident.operation.TridentCollector;
 import storm.trident.operation.TridentOperationContext;
 import storm.trident.tuple.TridentTuple;
 
+@SuppressWarnings("rawtypes" /* Storm has no generic types */)
 public class TermFilter extends BaseFunction {
+
+	private static final long serialVersionUID = 1L;
 
 	private SpellChecker spellchecker;
 	private List<String> filterTerms = Arrays.asList(new String[] { "http" });

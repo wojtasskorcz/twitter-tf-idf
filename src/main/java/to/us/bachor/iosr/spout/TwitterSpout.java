@@ -17,7 +17,10 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
+@SuppressWarnings("rawtypes" /* Storm has no generic types */)
 public class TwitterSpout extends BaseRichSpout {
+
+	private static final long serialVersionUID = 1L;
 
 	LinkedBlockingQueue<Status> queue = null;
 	TwitterStream twitterStream;

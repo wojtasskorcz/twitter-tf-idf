@@ -12,7 +12,10 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Tuple;
 
+@SuppressWarnings("rawtypes" /* Storm has no generic types */)
 public class PublishURLBolt extends BaseRichBolt {
+
+	private static final long serialVersionUID = 1L;
 
 	private Jedis jedis;
 

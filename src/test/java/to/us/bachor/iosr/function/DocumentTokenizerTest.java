@@ -11,11 +11,6 @@ public class DocumentTokenizerTest {
 	private static final String DOCUMENT_FIELD_NAME = "document";
 	private static final String SPACE = " ";
 
-	private TridentCollector getTridentCollectorMock() {
-		TridentCollector collector = Mockito.mock(TridentCollector.class);
-		return collector;
-	}
-
 	private void tokenize(TridentCollector collector, String documentContent) {
 		TridentTuple tuple = Mockito.mock(TridentTuple.class);
 		Mockito.when(tuple.getStringByField(DOCUMENT_FIELD_NAME)).thenReturn(documentContent);
