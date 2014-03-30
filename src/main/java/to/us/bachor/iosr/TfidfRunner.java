@@ -1,5 +1,21 @@
 package to.us.bachor.iosr;
 
+import static to.us.bachor.iosr.TopologyNames.ARGS;
+import static to.us.bachor.iosr.TopologyNames.DF_TERM;
+import static to.us.bachor.iosr.TopologyNames.DIRTY_TERM;
+import static to.us.bachor.iosr.TopologyNames.DOCUMENT;
+import static to.us.bachor.iosr.TopologyNames.DOCUMENT_ID;
+import static to.us.bachor.iosr.TopologyNames.D_TERM;
+import static to.us.bachor.iosr.TopologyNames.MOCK_DOCUMENT_TOPOLOGY;
+import static to.us.bachor.iosr.TopologyNames.SOURCE;
+import static to.us.bachor.iosr.TopologyNames.TERM;
+import static to.us.bachor.iosr.TopologyNames.TF_IDF_QUERY;
+import static to.us.bachor.iosr.TopologyNames.TF_IDF_RESULT;
+import static to.us.bachor.iosr.TopologyNames.TF_TERM;
+import static to.us.bachor.iosr.TopologyNames.TWITTER_SOURCE;
+import static to.us.bachor.iosr.TopologyNames.URL;
+import static to.us.bachor.iosr.TopologyNames.URL_SPOUT;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -43,9 +59,9 @@ public class TfidfRunner {
 			LocalDRPC drpc = new LocalDRPC();
 			LocalCluster cluster = new LocalCluster();
 			TridentTopology topology = buildMockDocumentTopology(drpc);
-			cluster.submitTopology("mockDocumentTopology", conf, topology.build());
+			cluster.submitTopology(MOCK_DOCUMENT_TOPOLOGY, conf, topology.build());
 			for (int i = 0; i < 100; i++) {
-				System.out.println("tfidfQuery " + drpc.execute("tfidfQuery", urls[0] + " have"));
+				System.out.println(TF_IDF_QUERY + " " + drpc.execute(TF_IDF_QUERY, urls[0] + " have"));
 				Thread.sleep(1000);
 			}
 		}
@@ -55,60 +71,58 @@ public class TfidfRunner {
 		TridentTopology topology = new TridentTopology();
 
 		// emits: url
-		FixedBatchSpout testSpout = new FixedBatchSpout(new Fields("url"), 1,
-				new ArrayList<Object>(Arrays.asList(urls)));
-		testSpout.setCycle(true);
+		FixedBatchSpout testSpout = new FixedBatchSpout(new Fields(URL), 1, new ArrayList<Object>(Arrays.asList(urls)));
 
 		/* ================================ streams ================================ */
 
 		// gets: url
 		// emits: url, document (actual content), documentId (document's url), source (here: "twitter")
 		Stream documentStream = topology //
-				.newStream("tweetSpout", testSpout) //
+				.newStream(URL_SPOUT, testSpout) //
 				.parallelismHint(20) //
-				.each(new Fields("url"), new DocumentFetchFunction(mimeTypes),
-						new Fields("document", "documentId", "source"));
+				.each(new Fields(URL), new DocumentFetchFunction(mimeTypes), new Fields(DOCUMENT, DOCUMENT_ID, SOURCE));
 
 		// gets: url, document (actual content), documentId (document's url), source (here: "twitter")
 		// emits: term (lemmatized), documentId (document's url), source (here: "twitter")
 		Stream termStream = documentStream //
 				.parallelismHint(20) //
-				.each(new Fields("document"), new DocumentTokenizer(), new Fields("dirtyTerm")) //
-				.each(new Fields("dirtyTerm"), new TermFilter(), new Fields("term")) //
-				.project(new Fields("term", "documentId", "source"));
+				.each(new Fields(DOCUMENT), new DocumentTokenizer(), new Fields(DIRTY_TERM)) //
+				.each(new Fields(DIRTY_TERM), new TermFilter(), new Fields(TERM)) //
+				.project(new Fields(TERM, DOCUMENT_ID, SOURCE));
 
 		/* ================================ states ================================ */
 
 		// gets: url, document (actual content), documentId (document's url), source (here: "twitter")
 		// contains: d (total number of documents from this source)
 		TridentState dState = documentStream //
-				.groupBy(new Fields("source")) //
-				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields("d"));
+				.groupBy(new Fields(SOURCE)) //
+				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(D_TERM));
 
 		// gets: term (lemmatized), documentId (document's url), source (here: "twitter")
 		// contains: df (number of appearances of the term in all documents)
 		TridentState dfState = termStream //
-				.groupBy(new Fields("term")) //
-				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields("df"));
+				.groupBy(new Fields(TERM)) //
+				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(DF_TERM));
 
 		// gets: documentId (document's url), term (lemmatized)
 		// contains: tf (number of appearances of the term in the document)
 		TridentState tfState = termStream //
-				.groupBy(new Fields("documentId", "term")) //
-				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields("tf"));
+				.groupBy(new Fields(DOCUMENT_ID, TERM)) //
+				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(TF_TERM));
 
 		/* ================================ DRPC streams ================================ */
 
 		// gets: args (a string in form <documentId><space><term>)
 		// returns: documentId (document's url), term, tfidf
-		topology.newDRPCStream("tfidfQuery", drpc)
-				.each(new Fields("args"), new SplitAndProjectToFields(), new Fields("documentId", "term"))
-				.each(new Fields(), new AddSourceField("twitter"), new Fields("source"))
-				.stateQuery(dState, new Fields("source"), new MapGetNoNulls(), new Fields("d"))
-				.stateQuery(dfState, new Fields("term"), new MapGetNoNulls(), new Fields("df"))
-				.stateQuery(tfState, new Fields("documentId", "term"), new MapGetNoNulls(), new Fields("tf"))
-				.each(new Fields("term", "documentId", "d", "df", "tf"), new TfidfExpression(), new Fields("tfidf")) //
-				.project(new Fields("documentId", "term", "tfidf"));
+		topology.newDRPCStream(TF_IDF_QUERY, drpc)
+				.each(new Fields(ARGS), new SplitAndProjectToFields(), new Fields(DOCUMENT_ID, TERM))
+				.each(new Fields(), new AddSourceField(TWITTER_SOURCE), new Fields(SOURCE))
+				.stateQuery(dState, new Fields(SOURCE), new MapGetNoNulls(), new Fields(D_TERM))
+				.stateQuery(dfState, new Fields(TERM), new MapGetNoNulls(), new Fields(DF_TERM))
+				.stateQuery(tfState, new Fields(DOCUMENT_ID, TERM), new MapGetNoNulls(), new Fields(TF_TERM))
+				.each(new Fields(TERM, DOCUMENT_ID, D_TERM, DF_TERM, TF_TERM), new TfidfExpression(),
+						new Fields(TF_IDF_RESULT)) //
+				.project(new Fields(DOCUMENT_ID, TERM, TF_IDF_RESULT));
 
 		return topology;
 	}

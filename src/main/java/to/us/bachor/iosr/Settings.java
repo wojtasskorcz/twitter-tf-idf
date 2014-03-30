@@ -12,8 +12,6 @@ public class Settings implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(Settings.class);
 
-	public final static String REDIS_URLS_KEY = "urls";
-
 	private final static String SYSTEM_PROPERTY_SETTINGS_FILE_NAME = "tf.idf.propertiesfile";
 
 	public static enum Key {

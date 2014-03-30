@@ -1,5 +1,7 @@
 package to.us.bachor.iosr.function;
 
+import static to.us.bachor.iosr.TopologyNames.*;
+
 import java.io.IOException;
 import java.io.StringReader;
 
@@ -25,7 +27,7 @@ public class DocumentTokenizer extends BaseFunction {
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
 		logger.debug("tokenizer starts");
-		String documentContents = tuple.getStringByField("document");
+		String documentContents = tuple.getStringByField(DOCUMENT);
 		TokenStream ts = null;
 		try {
 			ts = new StopFilter(Version.LUCENE_30, new StandardTokenizer(Version.LUCENE_30, new StringReader(

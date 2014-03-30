@@ -1,5 +1,7 @@
 package to.us.bachor.iosr.bolt;
 
+import static to.us.bachor.iosr.TopologyNames.*;
+
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -35,7 +37,7 @@ public class PublishURLBolt extends BaseRichBolt {
 		URLEntity[] urls = ret.getURLEntities();
 		for (int i = 0; i < urls.length; i++) {
 			logger.debug("saving: " + urls[i].getURL().trim());
-			jedis.rpush(Settings.REDIS_URLS_KEY, urls[i].getURL().trim());
+			jedis.rpush(REDIS_URLS_KEY, urls[i].getURL().trim());
 		}
 	}
 

@@ -1,5 +1,7 @@
 package to.us.bachor.iosr.spout;
 
+import static to.us.bachor.iosr.TopologyNames.*;
+
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -98,7 +100,7 @@ public class TwitterSpout extends BaseRichSpout {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("tweet"));
+		declarer.declare(new Fields(TWEET));
 	}
 
 }

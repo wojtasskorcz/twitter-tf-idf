@@ -1,5 +1,7 @@
 package to.us.bachor.iosr.function;
 
+import static to.us.bachor.iosr.TopologyNames.*;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
@@ -31,7 +33,7 @@ public class DocumentFetchFunction extends BaseFunction {
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		String url = tuple.getStringByField("url");
+		String url = tuple.getStringByField(URL);
 		logger.debug("fetching document: " + url);
 		try {
 			Parser parser = new AutoDetectParser();
@@ -43,7 +45,7 @@ public class DocumentFetchFunction extends BaseFunction {
 			String[] mimeDetails = metadata.get("Content-Type").split(";");
 			if ((mimeDetails.length > 0) && (mimeTypes.contains(mimeDetails[0]))) {
 				logger.debug("emitting fetched document contents: " + url);
-				collector.emit(new Values(handler.toString(), url.trim(), "twitter"));
+				collector.emit(new Values(handler.toString(), url.trim(), TWITTER_SOURCE));
 			}
 		} catch (Exception e) {
 			logger.error("Cannot fetch document: " + url, e);
