@@ -9,7 +9,6 @@ import storm.trident.TridentTopology;
 import storm.trident.operation.builtin.Count;
 import storm.trident.testing.FixedBatchSpout;
 import storm.trident.testing.MemoryMapState;
-import storm.trident.testing.Split;
 import to.us.bachor.iosr.function.AddSourceField;
 import to.us.bachor.iosr.function.DocumentFetchFunction;
 import to.us.bachor.iosr.function.DocumentTokenizer;
@@ -27,8 +26,9 @@ import backtype.storm.tuple.Fields;
  * dictionary words from those documents and then computes D, DF and TF factors of tf-idf. Then submits this Topology to
  * Storm.
  * 
- * Not yet finished: Should use Redis values gathered by TwitterScraperRunner. Uses a mock FixedBatchSpout so far.
- * Computing of D, DF and TF not yet implemented.
+ * Not yet finished: Should use Redis values gathered by TwitterScraperRunner. Uses
+ * 
+ * a mock FixedBatchSpout so far. Computing of D, DF and TF not yet implemented.
  */
 public class TfidfRunner {
 
@@ -43,8 +43,6 @@ public class TfidfRunner {
 			TridentTopology topology = buildMockDocumentTopology(drpc);
 			cluster.submitTopology("mockDocumentTopology", conf, topology.build());
 			for (int i = 0; i < 100; i++) {
-				// System.out.println("dQuery " + drpc.execute("dQuery", "twitter"));
-				// System.out.println("dfQuery " + drpc.execute("dfQuery", "have your dupa"));
 				System.out.println("tfidfQuery " + drpc.execute("tfidfQuery", urls[0] + " have"));
 				Thread.sleep(1000);
 			}
@@ -57,6 +55,7 @@ public class TfidfRunner {
 		// emits: url
 		FixedBatchSpout testSpout = new FixedBatchSpout(new Fields("url"), 1,
 				new ArrayList<Object>(Arrays.asList(urls)));
+		testSpout.setCycle(true);
 
 		/* ================================ streams ================================ */
 
@@ -97,20 +96,6 @@ public class TfidfRunner {
 				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields("tf"));
 
 		/* ================================ DRPC streams ================================ */
-
-		// gets: args (space-separated list of sources)
-		// returns: source, d (the D factor of tf-idf for this source)
-		topology.newDRPCStream("dQuery", drpc) //
-				.each(new Fields("args"), new Split(), new Fields("source")) //
-				.stateQuery(dState, new Fields("source"), new MapGetNoNulls(), new Fields("d")) //
-				.project(new Fields("source", "d"));
-
-		// gets: args (space-separated list of terms)
-		// returns: term, df (the DF factor of tf-idf for this term)
-		topology.newDRPCStream("dfQuery", drpc) //
-				.each(new Fields("args"), new Split(), new Fields("term")) //
-				.stateQuery(dfState, new Fields("term"), new MapGetNoNulls(), new Fields("df")) //
-				.project(new Fields("term", "df"));
 
 		// gets: args (a string in form <documentId><space><term>)
 		// returns: documentId (document's url), term, tfidf
