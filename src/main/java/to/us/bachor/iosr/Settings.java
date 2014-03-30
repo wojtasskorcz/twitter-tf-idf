@@ -11,11 +11,13 @@ public class Settings implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(Settings.class);
+	private static final String TEMP_DIR_PATH = System.getProperty("java.io.tmpdir");
 
 	private final static String SYSTEM_PROPERTY_SETTINGS_FILE_NAME = "tf.idf.propertiesfile";
 
 	public static enum Key {
-		REDIS_HOST("REDIS_HOST", "localhost"), REDIS_PORT("REDIS_PORT", "6379");
+		REDIS_HOST("REDIS_HOST", "localhost"), REDIS_PORT("REDIS_PORT", "6379"), TEMPORARY_DIRECTORY(
+				"TEMPORARY_DIRECTORY", TEMP_DIR_PATH);
 
 		public String propertyName;
 		public String defaultValue;
@@ -34,11 +36,16 @@ public class Settings implements Serializable {
 	private Settings(String settingsFileName) {
 		InputStream settingsStream = this.getClass().getClassLoader().getResourceAsStream(settingsFileName);
 		properties = new Properties();
-		try {
-			properties.load(settingsStream);
-		} catch (IOException e) {
+		if (settingsStream != null) {
+			try {
+				properties.load(settingsStream);
+			} catch (IOException e) {
+				logger.error("Cannot load properties from classpath file: " + settingsFileName
+						+ " - defaults will be used.", e);
+			}
+		} else {
 			logger.error("Cannot load properties from classpath file: " + settingsFileName
-					+ " - defaults will be used.", e);
+					+ " - defaults will be used.");
 		}
 	}
 

@@ -19,12 +19,15 @@ import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.operation.TridentOperationContext;
 import storm.trident.tuple.TridentTuple;
+import to.us.bachor.iosr.Settings;
+import to.us.bachor.iosr.Settings.Key;
 
 @SuppressWarnings("rawtypes" /* Storm has no generic types */)
 public class TermFilter extends BaseFunction {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(TermFilter.class);
+	private static final Settings settings = Settings.getSettings();
 
 	private SpellChecker spellchecker;
 	private List<String> filterTerms = Arrays.asList(new String[] { "http" });
@@ -32,7 +35,7 @@ public class TermFilter extends BaseFunction {
 	@Override
 	public void prepare(Map conf, TridentOperationContext context) {
 		super.prepare(conf, context);
-		File dir = new File(System.getProperty("user.home") + "/dictionaries");
+		File dir = new File(settings.getProperty(Key.TEMPORARY_DIRECTORY) + "/dictionaries");
 		Directory directory;
 		try {
 			directory = FSDirectory.open(dir);
