@@ -30,6 +30,8 @@ import backtype.storm.tuple.Fields;
  * 
  * a mock FixedBatchSpout so far. Computing of D, DF and TF not yet implemented.
  */
+
+@SuppressWarnings("unchecked" /* Storm has no generic types */)
 public class TfidfRunner {
 
 	private static String[] mimeTypes = new String[] { "text/html", "text/plain" };

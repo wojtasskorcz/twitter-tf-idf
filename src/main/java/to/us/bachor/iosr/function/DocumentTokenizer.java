@@ -3,6 +3,7 @@ package to.us.bachor.iosr.function;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
@@ -18,9 +19,12 @@ import edu.washington.cs.knowitall.morpha.MorphaStemmer;
 
 public class DocumentTokenizer extends BaseFunction {
 
+	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(DocumentTokenizer.class);
+
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		System.out.println("tokenizer starts");
+		logger.debug("tokenizer starts");
 		String documentContents = tuple.getStringByField("document");
 		TokenStream ts = null;
 		try {
@@ -34,7 +38,7 @@ public class DocumentTokenizer extends BaseFunction {
 			}
 			ts.close();
 		} catch (IOException e) {
-			System.err.println(e.toString());
+			logger.error("Error when tokenizing a document", e);
 		} finally {
 			if (ts != null) {
 				try {
@@ -42,9 +46,8 @@ public class DocumentTokenizer extends BaseFunction {
 				} catch (IOException e) {
 				}
 			}
-
 		}
-		System.out.println("tokenizer ends");
+		logger.debug("tokenizer ends");
 	}
 
 }

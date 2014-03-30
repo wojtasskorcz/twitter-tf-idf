@@ -3,6 +3,8 @@ package to.us.bachor.iosr.spout;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.log4j.Logger;
+
 import twitter4j.FilterQuery;
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -17,7 +19,11 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
+@SuppressWarnings("rawtypes" /* Storm has no generic types */)
 public class TwitterSpout extends BaseRichSpout {
+
+	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(TwitterSpout.class);
 
 	LinkedBlockingQueue<Status> queue = null;
 	TwitterStream twitterStream;
@@ -32,7 +38,7 @@ public class TwitterSpout extends BaseRichSpout {
 
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-		System.out.println("opening");
+		logger.debug("Opening TwitterSpout");
 		this.collector = collector;
 		queue = new LinkedBlockingQueue<Status>(1000);
 
@@ -56,10 +62,10 @@ public class TwitterSpout extends BaseRichSpout {
 			@Override
 			public void onStatus(Status status) {
 				if (queue.size() < maxQueueDepth) {
-					System.out.println("TWEET Received: " + status);
+					logger.debug("Reveived tweet: " + status);
 					queue.offer(status);
 				} else {
-					System.out.println("Queue is now full, the following message is dropped: " + status);
+					logger.warn("Queue is now full, the following message is dropped: " + status);
 				}
 			}
 
@@ -74,7 +80,7 @@ public class TwitterSpout extends BaseRichSpout {
 		filter.count(0);
 		filter.track(trackTerms);
 		twitterStream.filter(filter);
-		System.out.println("end opening");
+		logger.debug("TwitterSpout opened");
 	}
 
 	@Override

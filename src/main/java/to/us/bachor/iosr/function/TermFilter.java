@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.spell.PlainTextDictionary;
@@ -19,7 +20,11 @@ import storm.trident.operation.TridentCollector;
 import storm.trident.operation.TridentOperationContext;
 import storm.trident.tuple.TridentTuple;
 
+@SuppressWarnings("rawtypes" /* Storm has no generic types */)
 public class TermFilter extends BaseFunction {
+
+	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(TermFilter.class);
 
 	private SpellChecker spellchecker;
 	private List<String> filterTerms = Arrays.asList(new String[] { "http" });
@@ -43,12 +48,11 @@ public class TermFilter extends BaseFunction {
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		System.out.print("filtering: " + tuple);
+		logger.debug("filtering: " + tuple);
 		if (isKeep(tuple)) {
-			System.out.print(" ACCEPTED");
+			logger.debug("Accepted tuple: " + tuple);
 			collector.emit(tuple);
 		}
-		System.out.println();
 	}
 
 	private boolean shouldKeep(String stem) {
@@ -73,13 +77,12 @@ public class TermFilter extends BaseFunction {
 		try {
 			return spellchecker.exist(stem);
 		} catch (Exception e) {
-			System.err.println(e.toString());
+			logger.error("Exception when running spellchecker on " + stem, e);
 			return false;
 		}
 	}
 
 	private boolean isKeep(TridentTuple tuple) {
-		// System.out.println("Filtering Tuple");
 		return shouldKeep(tuple.getString(0));
 	}
 
