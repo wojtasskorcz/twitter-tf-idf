@@ -26,8 +26,8 @@ public class DocumentTokenizer extends BaseFunction {
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		logger.debug("tokenizer starts");
 		String documentContents = tuple.getStringByField(DOCUMENT);
+		logger.info("Tokenizing: " + tuple.getStringByField(URL));
 		TokenStream ts = null;
 		try {
 			ts = new StopFilter(Version.LUCENE_30, new StandardTokenizer(Version.LUCENE_30, new StringReader(
@@ -51,5 +51,4 @@ public class DocumentTokenizer extends BaseFunction {
 		}
 		logger.debug("tokenizer ends");
 	}
-
 }

@@ -1,29 +1,14 @@
 package to.us.bachor.iosr;
 
-import static to.us.bachor.iosr.TopologyNames.ARGS;
-import static to.us.bachor.iosr.TopologyNames.DF_TERM;
-import static to.us.bachor.iosr.TopologyNames.DIRTY_TERM;
-import static to.us.bachor.iosr.TopologyNames.DOCUMENT;
-import static to.us.bachor.iosr.TopologyNames.DOCUMENT_ID;
-import static to.us.bachor.iosr.TopologyNames.D_TERM;
-import static to.us.bachor.iosr.TopologyNames.MOCK_DOCUMENT_TOPOLOGY;
-import static to.us.bachor.iosr.TopologyNames.SOURCE;
-import static to.us.bachor.iosr.TopologyNames.TERM;
-import static to.us.bachor.iosr.TopologyNames.TF_IDF_QUERY;
-import static to.us.bachor.iosr.TopologyNames.TF_IDF_RESULT;
-import static to.us.bachor.iosr.TopologyNames.TF_TERM;
-import static to.us.bachor.iosr.TopologyNames.TWITTER_SOURCE;
-import static to.us.bachor.iosr.TopologyNames.URL;
-import static to.us.bachor.iosr.TopologyNames.URL_SPOUT;
+import static to.us.bachor.iosr.TopologyNames.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import storm.trident.Stream;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.operation.builtin.Count;
-import storm.trident.testing.FixedBatchSpout;
 import storm.trident.testing.MemoryMapState;
 import to.us.bachor.iosr.function.AddSourceField;
 import to.us.bachor.iosr.function.DocumentFetchFunction;
@@ -32,6 +17,7 @@ import to.us.bachor.iosr.function.MapGetNoNulls;
 import to.us.bachor.iosr.function.SplitAndProjectToFields;
 import to.us.bachor.iosr.function.TermFilter;
 import to.us.bachor.iosr.function.TfidfExpression;
+import to.us.bachor.iosr.spout.UrlSpout;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.LocalDRPC;
@@ -60,9 +46,10 @@ public class TfidfRunner {
 			LocalCluster cluster = new LocalCluster();
 			TridentTopology topology = buildMockDocumentTopology(drpc);
 			cluster.submitTopology(MOCK_DOCUMENT_TOPOLOGY, conf, topology.build());
-			for (int i = 0; i < 100; i++) {
-				System.out.println(TF_IDF_QUERY + " " + drpc.execute(TF_IDF_QUERY, urls[0] + " have"));
-				Thread.sleep(1000);
+			while (true) {
+				BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+				String queryLine = bufferRead.readLine();
+				System.out.println(TF_IDF_QUERY + " " + drpc.execute(TF_IDF_QUERY, queryLine));
 			}
 		}
 	}
@@ -71,22 +58,25 @@ public class TfidfRunner {
 		TridentTopology topology = new TridentTopology();
 
 		// emits: url
-		FixedBatchSpout testSpout = new FixedBatchSpout(new Fields(URL), 1, new ArrayList<Object>(Arrays.asList(urls)));
-
+		// MOCK:
+		// FixedBatchSpout urlSpout = new FixedBatchSpout(new Fields(URL), 1, new
+		// ArrayList<Object>(Arrays.asList(urls)));
+		// REDIS:
+		UrlSpout urlSpout = new UrlSpout();
 		/* ================================ streams ================================ */
 
 		// gets: url
 		// emits: url, document (actual content), documentId (document's url), source (here: "twitter")
 		Stream documentStream = topology //
-				.newStream(URL_SPOUT, testSpout) //
-				.parallelismHint(20) //
+				.newStream(URL_SPOUT, urlSpout) //
+				.parallelismHint(1) //
 				.each(new Fields(URL), new DocumentFetchFunction(mimeTypes), new Fields(DOCUMENT, DOCUMENT_ID, SOURCE));
 
 		// gets: url, document (actual content), documentId (document's url), source (here: "twitter")
 		// emits: term (lemmatized), documentId (document's url), source (here: "twitter")
 		Stream termStream = documentStream //
-				.parallelismHint(20) //
-				.each(new Fields(DOCUMENT), new DocumentTokenizer(), new Fields(DIRTY_TERM)) //
+				.parallelismHint(1) //
+				.each(new Fields(DOCUMENT, URL), new DocumentTokenizer(), new Fields(DIRTY_TERM)) //
 				.each(new Fields(DIRTY_TERM), new TermFilter(), new Fields(TERM)) //
 				.project(new Fields(TERM, DOCUMENT_ID, SOURCE));
 
