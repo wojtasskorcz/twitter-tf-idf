@@ -13,6 +13,7 @@ import storm.trident.testing.MemoryMapState;
 import to.us.bachor.iosr.function.AddSourceField;
 import to.us.bachor.iosr.function.DocumentFetchFunction;
 import to.us.bachor.iosr.function.DocumentTokenizer;
+import to.us.bachor.iosr.function.LoggingFunction;
 import to.us.bachor.iosr.function.MapGetNoNulls;
 import to.us.bachor.iosr.function.SplitAndProjectToFields;
 import to.us.bachor.iosr.function.TermFilter;
@@ -85,6 +86,7 @@ public class TfidfRunner {
 		// gets: url, document (actual content), documentId (document's url), source (here: "twitter")
 		// contains: d (total number of documents from this source)
 		TridentState dState = documentStream //
+				.each(new Fields(URL), new LoggingFunction("dstate"), new Fields())//
 				.groupBy(new Fields(SOURCE)) //
 				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(D_TERM));
 
