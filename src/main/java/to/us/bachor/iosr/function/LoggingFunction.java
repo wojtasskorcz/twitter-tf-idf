@@ -9,6 +9,7 @@ import backtype.storm.tuple.Values;
 
 public class LoggingFunction extends BaseFunction {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(LoggingFunction.class);
 
 	private String tag;
 
@@ -18,7 +19,7 @@ public class LoggingFunction extends BaseFunction {
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		Logger.getLogger(tag).info("[" + tag + "] " + tuple);
+		logger.debug("[" + tag + "] " + tuple);
 		collector.emit(new Values());
 	}
 
