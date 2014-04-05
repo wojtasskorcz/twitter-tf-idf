@@ -1,6 +1,10 @@
 package to.us.bachor.iosr;
 
 import static to.us.bachor.iosr.TopologyNames.*;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import storm.trident.Stream;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
@@ -44,9 +48,9 @@ public class TfidfRunner {
 			TridentTopology topology = buildMockDocumentTopology(drpc);
 			cluster.submitTopology(MOCK_DOCUMENT_TOPOLOGY, conf, topology.build());
 			while (true) {
-				// BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-				// String queryLine = bufferRead.readLine();
-				System.out.println(TF_IDF_QUERY + " " + drpc.execute(TF_IDF_QUERY, "twitter have"));
+				BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+				String queryLine = bufferRead.readLine();
+				System.out.println(TF_IDF_QUERY + " " + drpc.execute(TF_IDF_QUERY, queryLine));
 				Thread.sleep(3000);
 			}
 		}

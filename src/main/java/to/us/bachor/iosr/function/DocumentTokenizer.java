@@ -49,6 +49,5 @@ public class DocumentTokenizer extends BaseFunction {
 				}
 			}
 		}
-		logger.debug("tokenizer ends");
 	}
 }

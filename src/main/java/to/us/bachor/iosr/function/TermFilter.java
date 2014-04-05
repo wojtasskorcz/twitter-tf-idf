@@ -54,9 +54,7 @@ public class TermFilter extends BaseFunction {
 
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		logger.debug("filtering: " + tuple);
 		if (isKeep(tuple)) {
-			logger.debug("Accepted tuple: " + tuple);
 			collector.emit(tuple);
 		}
 	}
