@@ -1,10 +1,6 @@
 package to.us.bachor.iosr;
 
 import static to.us.bachor.iosr.TopologyNames.*;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 import storm.trident.Stream;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
@@ -48,9 +44,10 @@ public class TfidfRunner {
 			TridentTopology topology = buildMockDocumentTopology(drpc);
 			cluster.submitTopology(MOCK_DOCUMENT_TOPOLOGY, conf, topology.build());
 			while (true) {
-				BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-				String queryLine = bufferRead.readLine();
-				System.out.println(TF_IDF_QUERY + " " + drpc.execute(TF_IDF_QUERY, queryLine));
+				// BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+				// String queryLine = bufferRead.readLine();
+				System.out.println(TF_IDF_QUERY + " " + drpc.execute(TF_IDF_QUERY, "twitter have"));
+				Thread.sleep(3000);
 			}
 		}
 	}
@@ -86,7 +83,7 @@ public class TfidfRunner {
 		// gets: url, document (actual content), documentId (document's url), source (here: "twitter")
 		// contains: d (total number of documents from this source)
 		TridentState dState = documentStream //
-				.each(new Fields(URL), new LoggingFunction("dstate"), new Fields())//
+				.each(new Fields(URL, SOURCE), new LoggingFunction("dstate"), new Fields())//
 				.groupBy(new Fields(SOURCE)) //
 				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(D_TERM));
 
