@@ -16,7 +16,7 @@ import backtype.storm.topology.TopologyBuilder;
  */
 public class TwitterScraperRunner {
 
-	private static String[] keywords = { "iphone" };
+	private static String[] keywords = { "reddit" };
 
 	public static void main(String[] args) throws Exception {
 		TopologyBuilder builder = new TopologyBuilder();
