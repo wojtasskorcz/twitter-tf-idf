@@ -60,6 +60,7 @@ public class TfIdfToplogyCreator {
 		// gets: term (lemmatized), documentId (document's url), source (here: "twitter")
 		// contains: df (number of appearances of the term in all documents)
 		TridentState dfState = termStream //
+				.each(new Fields(TERM, DOCUMENT_ID), new RemoveDuplicatesFilter())//
 				.groupBy(new Fields(TERM)) //
 				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(DF_TERM));
 
