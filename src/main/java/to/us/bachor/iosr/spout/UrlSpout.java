@@ -17,6 +17,7 @@ import backtype.storm.Config;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.tuple.Fields;
 
+@SuppressWarnings("rawtypes" /* Storm has no generic types */)
 public class UrlSpout implements IBatchSpout {
 
 	private static final long serialVersionUID = 1L;

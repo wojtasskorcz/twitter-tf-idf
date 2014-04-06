@@ -3,9 +3,7 @@ package to.us.bachor.iosr;
 import static to.us.bachor.iosr.TopologyNames.*;
 import to.us.bachor.iosr.bolt.PublishURLBolt;
 import to.us.bachor.iosr.spout.TwitterSpout;
-import backtype.storm.Config;
-import backtype.storm.LocalCluster;
-import backtype.storm.StormSubmitter;
+import backtype.storm.generated.StormTopology;
 import backtype.storm.topology.TopologyBuilder;
 
 /**
@@ -14,22 +12,15 @@ import backtype.storm.topology.TopologyBuilder;
  * 
  * The extracted links are not filtered out in regard to duplicates. Perhaps TODO.
  */
-public class TwitterScraperRunner {
+public class TwitterScraperTopologyCreator {
 
 	private static String[] keywords = { "reddit" };
 
-	public static void main(String[] args) throws Exception {
+	public StormTopology createTwitterScraperToplogy() {
 		TopologyBuilder builder = new TopologyBuilder();
 		builder.setSpout(TWITTER_SPOUT, new TwitterSpout(keywords, 1000));
 		builder.setBolt(PUBLISH_URL_BOLT, new PublishURLBolt(), 2).shuffleGrouping(TWITTER_SPOUT);
-		Config conf = new Config();
-		if (args != null && args.length > 0) {
-			conf.setNumWorkers(3);
-			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
-		} else {
-			LocalCluster cluster = new LocalCluster();
-			cluster.submitTopology(TWITTER_STREAM_TOPOLOGY, conf, builder.createTopology());
-		}
+		return builder.createTopology();
 	}
 
 }
