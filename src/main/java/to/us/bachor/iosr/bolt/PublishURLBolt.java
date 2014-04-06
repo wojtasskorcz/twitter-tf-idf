@@ -1,13 +1,14 @@
 package to.us.bachor.iosr.bolt;
 
-import static to.us.bachor.iosr.TopologyNames.*;
-
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import redis.clients.jedis.Jedis;
-import to.us.bachor.iosr.Settings;
+import to.us.bachor.iosr.db.dao.DocumentDao;
+import to.us.bachor.iosr.db.model.Document;
 import twitter4j.Status;
 import twitter4j.URLEntity;
 import backtype.storm.task.OutputCollector;
@@ -22,13 +23,12 @@ public class PublishURLBolt extends BaseRichBolt {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(PublishURLBolt.class);
 
-	private Jedis jedis;
-	private Settings settings = Settings.getSettings();
+	private DocumentDao documentDao;
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		jedis = new Jedis(settings.getProperty(Settings.Key.REDIS_HOST),
-				settings.getIntegerProperty(Settings.Key.REDIS_PORT));
+		ApplicationContext springContext = new ClassPathXmlApplicationContext("mongoConfiguration.xml");
+		documentDao = springContext.getBean(DocumentDao.class);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class PublishURLBolt extends BaseRichBolt {
 		URLEntity[] urls = ret.getURLEntities();
 		for (int i = 0; i < urls.length; i++) {
 			logger.debug("saving: " + urls[i].getURL().trim());
-			jedis.rpush(REDIS_URLS_KEY, urls[i].getURL().trim());
+			documentDao.saveDocument(new Document(urls[i].getURL().trim(), new Date()));
 		}
 	}
 

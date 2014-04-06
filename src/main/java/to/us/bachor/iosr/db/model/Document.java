@@ -12,6 +12,16 @@ public class Document {
 
 	private Date tweetDate;
 
+	private boolean processed = false;
+
+	public boolean isProcessed() {
+		return processed;
+	}
+
+	public void setProcessed(boolean processed) {
+		this.processed = processed;
+	}
+
 	public Document(String url, Date tweetDate) {
 		super();
 		this.url = url;
