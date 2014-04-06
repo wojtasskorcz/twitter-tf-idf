@@ -6,10 +6,12 @@ import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.operation.builtin.Count;
 import storm.trident.testing.MemoryMapState;
+import to.us.bachor.iosr.function.AddSourceField;
 import to.us.bachor.iosr.function.DocumentFetchFunction;
 import to.us.bachor.iosr.function.DocumentTokenizer;
 import to.us.bachor.iosr.function.LoggingFunction;
 import to.us.bachor.iosr.function.MapGetNoNulls;
+import to.us.bachor.iosr.function.SplitAndProjectToFields;
 import to.us.bachor.iosr.function.TermFilter;
 import to.us.bachor.iosr.function.TfidfExpression;
 import to.us.bachor.iosr.spout.UrlSpout;
@@ -71,14 +73,15 @@ public class TfIdfToplogyCreator {
 
 		// gets: args (a string in form <documentId><space><term>)
 		// returns: documentId (document's url), term, tfidf
-		termStream
+		topology.newDRPCStream(TF_IDF_QUERY, drpc)
+				.each(new Fields(ARGS), new SplitAndProjectToFields(), new Fields(DOCUMENT_ID, TERM))
+				.each(new Fields(), new AddSourceField(TWITTER_SOURCE), new Fields(SOURCE))
 				.stateQuery(dState, new Fields(SOURCE), new MapGetNoNulls(), new Fields(D_TERM))
 				.stateQuery(dfState, new Fields(TERM), new MapGetNoNulls(), new Fields(DF_TERM))
 				.stateQuery(tfState, new Fields(DOCUMENT_ID, TERM), new MapGetNoNulls(), new Fields(TF_TERM))
 				.each(new Fields(TERM, DOCUMENT_ID, D_TERM, DF_TERM, TF_TERM), new TfidfExpression(),
 						new Fields(TF_IDF_RESULT))//
-				.project(new Fields(DOCUMENT_ID, TERM, TF_IDF_RESULT))//
-				.each(new Fields(DOCUMENT_ID, TERM, TF_IDF_RESULT), new LoggingFunction("tfidf"), new Fields()); //
+				.project(new Fields(DOCUMENT_ID, TERM, TF_IDF_RESULT));
 
 		return topology;
 	}

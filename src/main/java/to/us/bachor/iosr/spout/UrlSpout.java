@@ -14,6 +14,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import storm.trident.operation.TridentCollector;
 import storm.trident.spout.IBatchSpout;
 import to.us.bachor.iosr.db.dao.DocumentDao;
+import to.us.bachor.iosr.db.model.Document;
 import backtype.storm.Config;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.tuple.Fields;
@@ -35,16 +36,16 @@ public class UrlSpout implements IBatchSpout {
 
 	@Override
 	public void emitBatch(long batchId, TridentCollector collector) {
-		String url = documentDao.getOldestUnprocessedAndMarkAsProcessed().getUrl();
-		logger.info("next url = " + url);
-		if (url == null) {
+		Document document = documentDao.getOldestUnprocessedAndMarkAsProcessed();
+		logger.info("next url = " + document);
+		if (document == null) {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
 			}
 		} else {
 			List<String> batch = new ArrayList<>();
-			batch.add(url);
+			batch.add(document.getUrl());
 			batches.put(batchId, batch);
 			collector.emit(new ArrayList<Object>(batch));
 		}

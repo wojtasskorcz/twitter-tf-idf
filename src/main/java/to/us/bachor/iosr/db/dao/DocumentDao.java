@@ -1,6 +1,8 @@
 package to.us.bachor.iosr.db.dao;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -36,4 +38,10 @@ public class DocumentDao {
 		return mongoTemplate.findAndModify(query, update, Document.class);
 	}
 
+	public Collection<Document> getAllProcessedDocumentsAfterDate(Date date) {
+		Criteria criteria = new Criteria().andOperator(Criteria.where("tweetDate").lt(date), Criteria
+				.where("processed").is(true));
+		Query query = new Query(criteria);
+		return mongoTemplate.find(query, Document.class);
+	}
 }
