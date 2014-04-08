@@ -30,29 +30,31 @@ public class TfIdfRunner {
 
 	private static final Logger logger = Logger.getLogger(TfIdfRunner.class);
 
-	public static void main(String[] args) throws InterruptedException {
+	public static LocalDRPC runTopology() {
 		Config conf = new Config();
-		if (args.length == 0) {
-			LocalDRPC drpc = new LocalDRPC();
-			LocalCluster cluster = new LocalCluster();
-			TridentTopology tfIdfToplogy = new TfIdfToplogyCreator().createTfIdfToplogy(drpc);
-			cluster.submitTopology(MOCK_DOCUMENT_TOPOLOGY, conf, tfIdfToplogy.build());
-			cluster.submitTopology(TWITTER_STREAM_TOPOLOGY, conf,
-					new TwitterScraperTopologyCreator().createTwitterScraperToplogy());
+		LocalDRPC drpc = new LocalDRPC();
+		LocalCluster cluster = new LocalCluster();
+		TridentTopology tfIdfToplogy = new TfIdfToplogyCreator().createTfIdfToplogy(drpc);
+		cluster.submitTopology(MOCK_DOCUMENT_TOPOLOGY, conf, tfIdfToplogy.build());
+		cluster.submitTopology(TWITTER_STREAM_TOPOLOGY, conf,
+				new TwitterScraperTopologyCreator().createTwitterScraperToplogy());
+		return drpc;
+	}
 
-			ApplicationContext springContext = new ClassPathXmlApplicationContext("mongoConfiguration.xml");
-			DocumentDao documentDao = springContext.getBean(DocumentDao.class);
-			String word = "have";
-			while (true) {
-				Thread.sleep(5000);
-				logger.debug("---Querying for the word '" + word + "' in all processed documents.");
-				Collection<Document> documentsToQuery = documentDao.getAllProcessedDocumentsAfterDate(new Date(1991, 1,
-						1));
-				for (Document document : documentsToQuery) {
-					logger.debug(drpc.execute(TF_IDF_QUERY, document.getUrl() + " " + word));
-				}
-				logger.debug("---Querying end---");
+	public static void main(String[] args) throws InterruptedException {
+
+		LocalDRPC drpc = runTopology();
+		ApplicationContext springContext = new ClassPathXmlApplicationContext("mongoConfiguration.xml");
+		DocumentDao documentDao = springContext.getBean(DocumentDao.class);
+		String word = "have";
+		while (true) {
+			Thread.sleep(5000);
+			logger.debug("---Querying for the word '" + word + "' in all processed documents.");
+			Collection<Document> documentsToQuery = documentDao.getAllProcessedDocumentsAfterDate(new Date(1991, 1, 1));
+			for (Document document : documentsToQuery) {
+				logger.debug(drpc.execute(TF_IDF_QUERY, document.getUrl() + " " + word));
 			}
+			logger.debug("---Querying end---");
 		}
 	}
 }
