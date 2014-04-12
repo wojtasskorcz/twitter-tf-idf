@@ -57,3 +57,11 @@ The deployed topology should be visible in StormUI.
 ### Deploying the web server
 
 Navigate to the `storm` subproject in your cloned repository. There, execute:
+
+    mvn jetty:run
+    
+Jetty web server will be started on port 8080. To see the DRPC results for a word (e.g. "have"), navigate in your web browser to:
+
+    localhost:8080/frequencies/have
+   
+
