@@ -36,7 +36,7 @@ If you didn't get any errors, you can double check if the cluster is running by 
 
 ### Starting MongoDB
 
-
+Parts of the application use MongoDB, which you should install and then start by running `mongod`.
 
 ### Deploying topology to the cluster
 
