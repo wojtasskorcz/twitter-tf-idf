@@ -32,8 +32,7 @@ public class TfIdfRunner {
 		LocalCluster cluster = new LocalCluster();
 		TridentTopology tfIdfTopology = new TfIdfToplogyCreator().createTfIdfToplogy(drpc);
 		StormSubmitter.submitTopology(MOCK_DOCUMENT_TOPOLOGY, conf, tfIdfTopology.build());
-		// StormSubmitter.submitTopology(TWITTER_STREAM_TOPOLOGY, conf,
-		// new TwitterScraperTopologyCreator().createTwitterScraperToplogy());
+
 		// cluster.submitTopology(MOCK_DOCUMENT_TOPOLOGY, conf, tfIdfTopology.build());
 		// cluster.submitTopology(TWITTER_STREAM_TOPOLOGY, conf,
 		// new TwitterScraperTopologyCreator().createTwitterScraperToplogy());
@@ -49,10 +48,11 @@ public class TfIdfRunner {
 		// while (true) {
 		// Thread.sleep(5000);
 		// logger.debug("---Querying for the word '" + word + "' in all processed documents.");
-		// Collection<Document> documentsToQuery = documentDao.getAllProcessedDocumentsAfterDate(new Date(1991, 1, 1));
-		// for (Document document : documentsToQuery) {
-		// logger.debug(drpc.execute(TF_IDF_QUERY, document.getUrl() + " " + word));
-		// }
+		// // Collection<Document> documentsToQuery = documentDao.getAllProcessedDocumentsAfterDate(new Date(1991, 1,
+		// // 1));
+		// // for (Document document : documentsToQuery) {
+		// logger.debug(drpc.execute(TF_IDF_QUERY, "http://t.co/hP5PM6fm have"));
+		// // }
 		// logger.debug("---Querying end---");
 		// }
 	}
