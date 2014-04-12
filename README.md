@@ -22,3 +22,13 @@ First, configure the Storm cluster by editing the file `${STORM_HOME}/conf/storm
 	# jetty uses the default 8080, so change StormUI port to 8081
 	ui.port: 8081
 
+Now you can run the Storm cluster executing the following commands in the console:
+
+    storm nimbus
+    storm supervisor
+    storm drpc
+    
+Optionally, if you want to use StormUI (recommended), run `storm ui`.
+
+If you didn't get any errors, you can double check if the cluster is running by navigating to `localhost:8081` in your web browser. You should see StormUI dashboard with info about the cluster.
+
