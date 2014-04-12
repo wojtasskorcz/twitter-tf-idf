@@ -66,12 +66,6 @@
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>2.6</version>
 			</plugin>
-
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.0.5.v20130815</version>
-			</plugin>
 		</plugins>
 	</reporting>
 	<dependencies>
@@ -101,16 +95,17 @@
 			<version>1.2.17</version>
 		</dependency>
 
-		<dependency>
+		<!--dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.7.6</version>
-		</dependency>
+		</dependency-->
 
 		<dependency>
 			<groupId>storm</groupId>
 			<artifactId>storm</artifactId>
 			<version>0.9.0.1</version>
+			<scope>provided</scope>
 			<!-- keep storm out of the jar-with-dependencies -->
 		</dependency>
 
@@ -201,6 +196,24 @@
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>2.6</version>
 			</plugin>
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.0.5.v20130815</version>
+			</plugin>
+			  <plugin>
+			    <artifactId>maven-assembly-plugin</artifactId>
+			    <configuration>
+			      <descriptorRefs>  
+			        <descriptorRef>jar-with-dependencies</descriptorRef>
+			      </descriptorRefs>
+			      <archive>
+			        <manifest>
+			          <mainClass>to.us.bachor.iosr.TfIdfRunner</mainClass>
+			        </manifest>
+			      </archive>
+			    </configuration>
+			  </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
