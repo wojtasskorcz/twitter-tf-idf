@@ -2,27 +2,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<artifactId>twitter-tf-idf</artifactId>
+		<groupId>to.us.bachor.iosr</groupId>
+		<version>1.0</version>
+	</parent>
+
 	<groupId>to.us.bachor.iosr</groupId>
-	<artifactId>twitter-tf-idf</artifactId>
+	<artifactId>web</artifactId>
 	<version>1.0</version>
-	<packaging>pom</packaging>
-	<name>twitter-tf-idf</name>
-	<description>Project aims to calculate importance of the given terms in the stream of tweets.</description>
-	<url>http://bachor.us.to/twitter-tf-idf</url>
-
-	<modules>
-		<module>storm</module>
-		<module>web</module>
-	</modules>
-
-	<developers>
-		<developer>
-			<name>Wojciech Grajewski</name>
-		</developer>
-		<developer>
-			<name>Paweł Chorążyk</name>
-		</developer>
-	</developers>
+	<packaging>war</packaging>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -110,8 +99,7 @@
 			<groupId>storm</groupId>
 			<artifactId>storm</artifactId>
 			<version>0.9.0.1</version>
-			<scope>provided</scope>
-			<!-- keep storm out of the jar-with-dependencies -->
+			<!-- include storm dependencies on the web server -->
 		</dependency>
 
 		<dependency>
@@ -206,19 +194,19 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>9.0.5.v20130815</version>
 			</plugin>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptorRefs>  
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>to.us.bachor.iosr.TfIdfRunner</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
+			  <plugin>
+			    <artifactId>maven-assembly-plugin</artifactId>
+			    <configuration>
+			      <descriptorRefs>  
+			        <descriptorRef>jar-with-dependencies</descriptorRef>
+			      </descriptorRefs>
+			      <archive>
+			        <manifest>
+			          <mainClass>to.us.bachor.iosr.TfIdfRunner</mainClass>
+			        </manifest>
+			      </archive>
+			    </configuration>
+			  </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

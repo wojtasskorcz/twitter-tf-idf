@@ -1,0 +1,9 @@
+<project name="Twitter TF-IDF">
+	<body>
+		<menu ref="reports"/>
+		
+		<menu name="Other">
+			<item name="Reports from meetings [pl]" href="meetings/index.html"/>
+		</menu>
+	</body>
+</project>
