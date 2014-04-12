@@ -14,8 +14,10 @@ public class RemoteDrpcTest {
 	@Test
 	public void mockedDrpc() throws TException, DRPCExecutionException {
 		DRPCClient client = new DRPCClient("127.0.0.1", 3772);
-		String result = client.execute(TF_IDF_QUERY, "http://t.co/hP5PM6fm have");
-		assertEquals("[[\"http:\\/\\/t.co\\/hP5PM6fm\",\"have\",16.0]]", result);
+		String term = "have";
+		String result = client.execute(TF_IDF_QUERY, MOCK_URL + " " + term);
+		String expected = String.format("[[\"%s\",\"%s\",16.0]]", MOCK_URL.replace("/", "\\/"), term);
+		assertEquals(expected, result);
 	}
 
 }

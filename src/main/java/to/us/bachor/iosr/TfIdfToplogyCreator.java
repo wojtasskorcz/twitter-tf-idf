@@ -30,7 +30,7 @@ public class TfIdfToplogyCreator {
 
 		// emits: url
 		// MOCK:
-		String[] urls = new String[] { "http://t.co/hP5PM6fm"/* , "http://t.co/xSFteG23" */};
+		String[] urls = new String[] { MOCK_URL };
 		FixedBatchSpout urlSpout = new FixedBatchSpout(new Fields(URL), 1, new ArrayList<Object>(Arrays.asList(urls)));
 		// REDIS:
 		// UrlSpout urlSpout = new UrlSpout();

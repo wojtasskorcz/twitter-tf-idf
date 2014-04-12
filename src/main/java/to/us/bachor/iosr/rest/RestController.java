@@ -1,5 +1,7 @@
 package to.us.bachor.iosr.rest;
 
+import static to.us.bachor.iosr.TopologyNames.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +9,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.apache.thrift7.TException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -20,7 +23,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import to.us.bachor.iosr.db.dao.DocumentDao;
 import backtype.storm.LocalDRPC;
 import backtype.storm.generated.AlreadyAliveException;
+import backtype.storm.generated.DRPCExecutionException;
 import backtype.storm.generated.InvalidTopologyException;
+import backtype.storm.utils.DRPCClient;
 
 @Controller
 @RequestMapping("/")
@@ -40,10 +45,12 @@ public class RestController {
 
 	@RequestMapping(value = "/frequencies/{term}", method = RequestMethod.GET)
 	public @ResponseBody
-	ResponseEntity<List<String>> getFrequencies(@PathVariable String term, HttpServletRequest request) {
+	ResponseEntity<List<String>> getFrequencies(@PathVariable String term, HttpServletRequest request)
+			throws TException, DRPCExecutionException {
 		// Collection<Document> documentsToQuery = documentDao.getAllProcessedDocumentsAfterDate(new Date(1991, 1, 1));
 		List<String> result = new ArrayList<>();
-		result.add("dupa");
+		DRPCClient client = new DRPCClient("127.0.0.1", 3772);
+		result.add(client.execute(TF_IDF_QUERY, MOCK_URL + " " + term));
 		// for (Document document : documentsToQuery) {
 		// result.add(drpc.execute(TF_IDF_QUERY, document.getUrl() + " " + term));
 		// }
