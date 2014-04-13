@@ -3,7 +3,9 @@ twitter-tf-idf
 
 ### Running Storm cluster
 
-Download and install Storm from `http://storm.incubator.apache.org/downloads.html`.
+Storm uses Zookeeper for coordinating the cluster. You can find installation guide for a standalone cluster here: `http://zookeeper.apache.org/doc/r3.3.3/zookeeperStarted.html#sc_InstallingSingleMode`.
+
+After you've installed and run Zookeeper, download and install Storm from `http://storm.incubator.apache.org/downloads.html`.
 
 First, configure the Storm cluster by editing the file `${STORM_HOME}/conf/storm.yaml`:
 
