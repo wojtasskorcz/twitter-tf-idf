@@ -26,6 +26,10 @@ public class TfIdfRunner {
 
 	public static void main(String[] args) throws InterruptedException, AlreadyAliveException, InvalidTopologyException {
 		TridentTopology tfIdfTopology = new TfIdfToplogyCreator().createTfIdfTopology();
-		StormSubmitter.submitTopology(MOCK_DOCUMENT_TOPOLOGY, new Config(), tfIdfTopology.build());
+		Config config = new Config();
+		config.setDebug(true);
+		// StormSubmitter.submitTopology(MOCK_DOCUMENT_TOPOLOGY, config, tfIdfTopology.build());
+		StormSubmitter.submitTopology(TWITTER_STREAM_TOPOLOGY, config,
+				new TwitterScraperTopologyCreator().createTwitterScraperToplogy());
 	}
 }
