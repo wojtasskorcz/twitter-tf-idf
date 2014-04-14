@@ -44,13 +44,13 @@ Parts of the application use MongoDB, which you should install and then start by
 
 Navigate to the `storm` subproject in your cloned repository. There, execute:
 
-    mvn assembly:assembly -DskipTests
+    mvn package -DskipTests
     
 As the topology is not yet deployed the tests would be failing preventing packaging of the project. Therefore we skip tests here.
 
 Next, deploy the topology:
 
-    storm jar target/twitter-tf-idf-1.0-jar-with-dependencies.jar to.us.bachor.iosr.TfIdfRunner
+    storm jar target/storm-1.0.jar to.us.bachor.iosr.TfIdfRunner
     
 Optionally, if you want to develop the project under Eclipse, run `mvn eclipse:eclipse`.
 
