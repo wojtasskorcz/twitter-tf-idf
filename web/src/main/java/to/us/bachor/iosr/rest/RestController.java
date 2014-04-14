@@ -3,6 +3,8 @@ package to.us.bachor.iosr.rest;
 import static to.us.bachor.iosr.TopologyNames.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import to.us.bachor.iosr.db.dao.DocumentDao;
-import backtype.storm.LocalDRPC;
+import to.us.bachor.iosr.db.model.Document;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.DRPCExecutionException;
 import backtype.storm.generated.InvalidTopologyException;
@@ -31,7 +33,6 @@ import backtype.storm.utils.DRPCClient;
 @RequestMapping("/")
 public class RestController {
 
-	private LocalDRPC drpc;
 	private DocumentDao documentDao;
 
 	@PostConstruct
@@ -47,13 +48,12 @@ public class RestController {
 	public @ResponseBody
 	ResponseEntity<List<String>> getFrequencies(@PathVariable String term, HttpServletRequest request)
 			throws TException, DRPCExecutionException {
-		// Collection<Document> documentsToQuery = documentDao.getAllProcessedDocumentsAfterDate(new Date(1991, 1, 1));
+		Collection<Document> documentsToQuery = documentDao.getAllProcessedDocumentsAfterDate(new Date(1991, 1, 1));
 		List<String> result = new ArrayList<>();
 		DRPCClient client = new DRPCClient("127.0.0.1", 3772);
-		result.add(client.execute(TF_IDF_QUERY, MOCK_URL + " " + term));
-		// for (Document document : documentsToQuery) {
-		// result.add(drpc.execute(TF_IDF_QUERY, document.getUrl() + " " + term));
-		// }
+		for (Document document : documentsToQuery) {
+			result.add(client.execute(TF_IDF_QUERY, document.getUrl() + " " + term));
+		}
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
 

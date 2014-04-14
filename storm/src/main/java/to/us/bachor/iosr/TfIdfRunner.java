@@ -28,7 +28,7 @@ public class TfIdfRunner {
 		TridentTopology tfIdfTopology = new TfIdfToplogyCreator().createTfIdfTopology();
 		Config config = new Config();
 		config.setDebug(true);
-		// StormSubmitter.submitTopology(MOCK_DOCUMENT_TOPOLOGY, config, tfIdfTopology.build());
+		StormSubmitter.submitTopology(MOCK_DOCUMENT_TOPOLOGY, config, tfIdfTopology.build());
 		StormSubmitter.submitTopology(TWITTER_STREAM_TOPOLOGY, config,
 				new TwitterScraperTopologyCreator().createTwitterScraperToplogy());
 	}

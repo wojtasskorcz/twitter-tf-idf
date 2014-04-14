@@ -22,7 +22,7 @@ public class TfidfExpression extends BaseFunction {
 			double tf = (double) tuple.getLongByField(TF_TERM);
 			String term = (String) tuple.getStringByField(TERM);
 			logger.info(String.format("d=%s, df=%s, tf=%s, term=%s", d, df, tf, term));
-			double tfidf = tf;// * Math.log(d / df);
+			double tfidf = tf * Math.log(d / df);
 			collector.emit(new Values(tfidf));
 		} catch (Exception e) {
 			logger.error("Error when calculating tf-idf", e);

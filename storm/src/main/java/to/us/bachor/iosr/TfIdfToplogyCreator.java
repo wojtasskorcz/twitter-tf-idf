@@ -1,15 +1,10 @@
 package to.us.bachor.iosr;
 
 import static to.us.bachor.iosr.TopologyNames.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import storm.trident.Stream;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.operation.builtin.Count;
-import storm.trident.testing.FixedBatchSpout;
 import storm.trident.testing.MemoryMapState;
 import to.us.bachor.iosr.function.AddSourceField;
 import to.us.bachor.iosr.function.DocumentFetchFunction;
@@ -20,6 +15,7 @@ import to.us.bachor.iosr.function.RemoveDuplicatesFilter;
 import to.us.bachor.iosr.function.SplitAndProjectToFields;
 import to.us.bachor.iosr.function.TermFilter;
 import to.us.bachor.iosr.function.TfidfExpression;
+import to.us.bachor.iosr.spout.UrlSpout;
 import backtype.storm.LocalDRPC;
 import backtype.storm.tuple.Fields;
 
@@ -35,10 +31,11 @@ public class TfIdfToplogyCreator {
 
 		// emits: url
 		// MOCK:
-		String[] urls = new String[] { MOCK_URL };
-		FixedBatchSpout urlSpout = new FixedBatchSpout(new Fields(URL), 1, new ArrayList<Object>(Arrays.asList(urls)));
+		// String[] urls = new String[] { MOCK_URL };
+		// FixedBatchSpout urlSpout = new FixedBatchSpout(new Fields(URL), 1, new
+		// ArrayList<Object>(Arrays.asList(urls)));
 		// REDIS:
-		// UrlSpout urlSpout = new UrlSpout();
+		UrlSpout urlSpout = new UrlSpout();
 		/* ================================ streams ================================ */
 
 		// gets: url
