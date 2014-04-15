@@ -17,8 +17,10 @@ First, configure the Storm cluster by editing the file `${STORM_HOME}/conf/storm
 
 	nimbus.host: "127.0.0.1"
 
+	# we need at least two workers, one for Twitter scraper and one for tf-idf topology
 	supervisor.slots.ports:
 	- 6700
+	- 6701
 
 	drpc.servers:
 	- "127.0.0.1"
