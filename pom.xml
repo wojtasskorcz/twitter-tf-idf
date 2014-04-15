@@ -105,14 +105,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>storm</groupId>
-			<artifactId>storm</artifactId>
-			<version>0.9.0.1</version>
-			<scope>provided</scope>
-			<!-- keep storm out of the jar-with-dependencies -->
-		</dependency>
-
-		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-jaxrs</artifactId>
 			<version>1.9.13</version>
