@@ -1,4 +1,4 @@
-package to.us.bachor.iosr;
+package to.us.bachor.iosr.function;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -7,8 +7,9 @@ import java.util.Set;
 import storm.trident.operation.Filter;
 import storm.trident.operation.TridentOperationContext;
 import storm.trident.tuple.TridentTuple;
+import to.us.bachor.iosr.TopologyNames;
 
-final class RemoveDuplicatesFilter implements Filter {
+public final class RemoveDuplicatesFilter implements Filter {
 	private static final long serialVersionUID = 1L;
 	private Set<Integer> hashes;
 

@@ -1,7 +1,7 @@
 package to.us.bachor.iosr.function;
 
 import java.io.File;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +44,14 @@ public class TermFilter extends BaseFunction {
 			spellchecker = new SpellChecker(directory);
 			StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
 			IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-			URL dictionaryFile = TermFilter.class.getResource("/fulldictionary00.txt");
-			spellchecker.indexDictionary(new PlainTextDictionary(new File(dictionaryFile.toURI())), config, true);
+			// URL dictionaryFile = TermFilter.class.getResource("/fulldictionary00.txt");
+			InputStream dictionaryStream = TermFilter.class.getResourceAsStream("/fulldictionary00.txt");
+			// logger.info("Using dictionary: " + dictionaryFile.toURI());
+			// spellchecker.indexDictionary(new PlainTextDictionary(new File(dictionaryFile.toURI())), config, true);
+			spellchecker.indexDictionary(new PlainTextDictionary(dictionaryStream), config, true);
 		} catch (Exception e) {
-			System.err.println(e.toString());
+			logger.error("Error when preparing dictionary: ", e);
+			// System.err.println(e.toString());
 		}
 		logger.debug("Preparing TermFilter Finished");
 	}

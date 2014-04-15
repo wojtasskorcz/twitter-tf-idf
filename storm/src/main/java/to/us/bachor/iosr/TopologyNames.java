@@ -26,4 +26,6 @@ public class TopologyNames {
 
 	public final static String TWITTER_STREAM_TOPOLOGY = "twitterStreamTopology";
 	public final static String MOCK_DOCUMENT_TOPOLOGY = "mockDocumentTopology";
+
+	public final static String MOCK_URL = "http://t.co/hP5PM6fm";
 }

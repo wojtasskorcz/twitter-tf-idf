@@ -1,0 +1,8 @@
+# eclipse config
+/.project
+/.classpath
+/.settings
+
+/src/main/resources/tf-idf.properties
+
+/target

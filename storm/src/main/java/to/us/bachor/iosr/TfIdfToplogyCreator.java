@@ -11,6 +11,7 @@ import to.us.bachor.iosr.function.DocumentFetchFunction;
 import to.us.bachor.iosr.function.DocumentTokenizer;
 import to.us.bachor.iosr.function.LoggingFunction;
 import to.us.bachor.iosr.function.MapGetNoNulls;
+import to.us.bachor.iosr.function.RemoveDuplicatesFilter;
 import to.us.bachor.iosr.function.SplitAndProjectToFields;
 import to.us.bachor.iosr.function.TermFilter;
 import to.us.bachor.iosr.function.TfidfExpression;
@@ -21,12 +22,16 @@ import backtype.storm.tuple.Fields;
 public class TfIdfToplogyCreator {
 	private static String[] mimeTypes = new String[] { "text/html", "text/plain" };
 
-	public TridentTopology createTfIdfToplogy(final LocalDRPC drpc) {
+	public TridentTopology createTfIdfTopology() {
+		return createTfIdfTopology(null);
+	}
+
+	public TridentTopology createTfIdfTopology(final LocalDRPC drpc) {
 		TridentTopology topology = new TridentTopology();
 
 		// emits: url
 		// MOCK:
-		// private static String[] urls = new String[] { "http://t.co/hP5PM6fm"/* , "http://t.co/xSFteG23" */};
+		// String[] urls = new String[] { MOCK_URL };
 		// FixedBatchSpout urlSpout = new FixedBatchSpout(new Fields(URL), 1, new
 		// ArrayList<Object>(Arrays.asList(urls)));
 		// REDIS:
@@ -74,7 +79,9 @@ public class TfIdfToplogyCreator {
 
 		// gets: args (a string in form <documentId><space><term>)
 		// returns: documentId (document's url), term, tfidf
-		topology.newDRPCStream(TF_IDF_QUERY, drpc)
+		Stream drpcStream = drpc == null ? topology.newDRPCStream(TF_IDF_QUERY) : topology.newDRPCStream(TF_IDF_QUERY,
+				drpc);
+		drpcStream
 				.each(new Fields(ARGS), new SplitAndProjectToFields(), new Fields(DOCUMENT_ID, TERM))
 				.each(new Fields(), new AddSourceField(TWITTER_SOURCE), new Fields(SOURCE))
 				.stateQuery(dState, new Fields(SOURCE), new MapGetNoNulls(), new Fields(D_TERM))
