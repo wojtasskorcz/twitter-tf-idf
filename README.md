@@ -44,7 +44,13 @@ Parts of the application use MongoDB, which you should install and then start by
 
 ### Deploying topology to the cluster
 
-Navigate to the `storm` subproject in your cloned repository. There, execute:
+Navigate to the `storm` subproject in your cloned repository. There, create file `src/main/resources/tf-idf.properties`, e.g.
+
+    REDIS_HOST=localhost
+    MONGO_HOST=localhost
+    MONGO_PORT=27017
+
+Execute:
 
     mvn package -DskipTests
     
@@ -60,7 +66,9 @@ The deployed topology should be visible in StormUI.
 
 ### Deploying the web server
 
-Navigate to the `storm` subproject in your cloned repository. There, execute:
+Navigate to the `web` subproject in your cloned repository. There, like before, create file `src/main/resources/tf-idf.properties`
+
+Execute:
 
     mvn jetty:run
     
