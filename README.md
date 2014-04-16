@@ -52,7 +52,7 @@ As the topology is not yet deployed the tests would be failing preventing packag
 
 Next, deploy the topology:
 
-    storm jar target/storm-1.0.jar to.us.bachor.iosr.TfIdfRunner
+    storm jar target/twitter-tf-idf-storm-1.0.jar to.us.bachor.iosr.TfIdfRunner
     
 Optionally, if you want to develop the project under Eclipse, run `mvn eclipse:eclipse`.
 
