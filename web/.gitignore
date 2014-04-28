@@ -3,6 +3,4 @@
 /.classpath
 /.settings
 
-/src/main/resources/tf-idf.properties
-
 /target
