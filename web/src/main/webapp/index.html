@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+	<title> Twitter TF-IDF </title>
+	<script src="js/jquery-2.0.3.min.js" type="text/javascript"></script>
+ 
+</head>
+<body>
+
+<input type="text" id="word"/>
+<input type="button" id="getButton" value="Get documents"/>  <br>
+
+<table id="dataTable">
+
+</table>
+
+
+<script type="text/javascript">
+
+	var showData = function(data){
+		var urlFrequencyObjects = [];
+	
+		data.forEach(function(dataElement){
+			dataElement = dataElement.split(",");
+			var url = dataElement[0].substr(3, dataElement[0].length-4).replace(/\\\//g, "/");
+			var word = dataElement[1];
+			
+			var frequency = dataElement[2].substr(0, dataElement[2].length-2);
+			
+			
+			var urlFrequencyObject = {
+				url: url,
+				frequency: frequency
+			}
+			
+			urlFrequencyObjects.push(urlFrequencyObject);
+			
+			
+			
+		
+		});
+		
+		urlFrequencyObjects.sort(function(a,b){
+			return b.frequency - a.frequency
+			});
+		
+		
+		var table$ = $("#dataTable");
+		table$.empty();
+		
+		urlFrequencyObjects.forEach(function(urlFrequencyObject){
+			var tr$ = $("<tr>");
+			
+			var urlTd$ = $("<td>");
+			var frequencyTd$ = $("<td>");
+			frequencyTd$.append(urlFrequencyObject.frequency);
+			var link = $("<a>");
+			link.attr("href",urlFrequencyObject.url);
+			link.append(urlFrequencyObject.url);
+			urlTd$.append(link);
+			$(tr$).append(urlTd$);
+			$(tr$).append(frequencyTd$);
+			table$.append(tr$);
+		});
+		
+		
+	}
+	
+	var getAndShowData = function(){
+		var word = $("#word").val();
+		$.ajax({
+			url: "rest/frequencies/"+word,
+			dataType: "json",
+			success: showData
+		});
+	}
+	
+	$("#getButton").on("click", getAndShowData);
+
+</script>
+
+</body>
+
+</html>

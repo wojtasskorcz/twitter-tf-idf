@@ -44,7 +44,7 @@ public class RestController {
 
 	private static final Logger logger = Logger.getLogger(RestController.class);
 
-	@RequestMapping(value = "/frequencies/{term}", method = RequestMethod.GET)
+	@RequestMapping(value = "frequencies/{term}", method = RequestMethod.GET)
 	public @ResponseBody
 	ResponseEntity<List<String>> getFrequencies(@PathVariable String term, HttpServletRequest request)
 			throws TException, DRPCExecutionException {
