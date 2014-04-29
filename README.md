@@ -3,9 +3,9 @@ twitter-tf-idf
 
 ### Running Storm cluster
 
-Storm uses Zookeeper for coordinating the cluster. You can find installation guide for a standalone cluster here: `http://zookeeper.apache.org/doc/r3.3.3/zookeeperStarted.html#sc_InstallingSingleMode`.
+Storm uses Zookeeper for coordinating the cluster. You can find installation guide for a standalone Zookeeper cluster [here](http://zookeeper.apache.org/doc/r3.3.3/zookeeperStarted.html#sc_InstallingSingleMode).
 
-After you've installed and run Zookeeper, download and install Storm from `http://storm.incubator.apache.org/downloads.html`.
+After you've installed and run Zookeeper, [download and install Storm](http://storm.incubator.apache.org/downloads.html).
 
 First, configure the Storm cluster by editing the file `${STORM_HOME}/conf/storm.yaml`:
 
@@ -41,6 +41,20 @@ If you didn't get any errors, you can double check if the cluster is running by 
 ### Starting MongoDB
 
 Parts of the application use MongoDB, which you should install and then start by running `mongod`.
+
+### Running Cassandra
+
+Trident states are kept in Cassandra. You should install and run Cassandra following the instructions [here](http://wiki.apache.org/cassandra/GettingStarted). The easiest way to install it on Debian-like systems is described [here](http://wiki.apache.org/cassandra/DebianPackaging).
+
+Connect to Cassandra server using:
+
+    cassandra-cli
+
+In the CLI create the necessary keyspace and column family:
+
+	create keyspace storm;
+	use storm;
+	create column family tfidf;
 
 ### Deploying topology to the cluster
 
