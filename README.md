@@ -38,9 +38,11 @@ Optionally, if you want to use StormUI (recommended), run `storm ui`.
 
 If you didn't get any errors, you can double check if the cluster is running by navigating to `localhost:8081` in your web browser. You should see StormUI dashboard with info about the cluster.
 
+
 ### Starting MongoDB
 
 Parts of the application use MongoDB, which you should install and then start by running `mongod`.
+
 
 ### Running Cassandra
 
@@ -55,6 +57,7 @@ In the CLI create the necessary keyspace and column family:
 	create keyspace storm;
 	use storm;
 	create column family tfidf;
+	
 
 ### Deploying topology to the cluster
 
@@ -78,6 +81,7 @@ Optionally, if you want to develop the project under Eclipse, run `mvn eclipse:e
 
 The deployed topology should be visible in StormUI.
 
+
 ### Deploying the web server
 
 Navigate to the `web` subproject in your cloned repository. There, like before, create file `src/main/resources/tf-idf.properties`
@@ -91,3 +95,12 @@ Jetty web server will be started on port 8080. To see the DRPC results for a wor
     localhost:8080/frequencies/have
    
 
+### Facilitating deployment with deployment scripts
+
+In `storm` subdirectory you'll find three deployment scripts. 
+
+`deploy.sh` compiles the `storm` subproject and deploys it to the Storm cluster. It is assumed that the project's topologies have been removed from the cluster beforehand.
+
+`undeploy.sh` removes the project's topologies from the Storm cluster.
+
+`clean_state.sh` cleans all the data gathered in Mongo and Cassandra, so you can start with a clean slate.
