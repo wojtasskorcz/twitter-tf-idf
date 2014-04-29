@@ -54,6 +54,17 @@
 			<artifactId>morpha-stemmer</artifactId>
 			<version>1.0.5</version>
 		</dependency>
+		<dependency>
+			<groupId>trident-cassandra</groupId>
+			<artifactId>trident-cassandra</artifactId>
+			<version>0.0.1-wip2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -71,6 +82,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.2</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
