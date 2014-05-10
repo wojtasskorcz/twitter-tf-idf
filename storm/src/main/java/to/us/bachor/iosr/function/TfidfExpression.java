@@ -22,12 +22,15 @@ public class TfidfExpression extends BaseFunction {
 			double tf = (double) tuple.getLongByField(TF_TERM);
 			String term = (String) tuple.getStringByField(TERM);
 			logger.info(String.format("d=%s, df=%s, tf=%s, term=%s", d, df, tf, term));
-			double tfidf = tf * Math.log(d / (df + 1));
+			double tfidf = tf * Math.log(d / (df));
+			if (df == 0) {
+				// we haven't seen that term in any document so we can't tell anything about it
+				tfidf = Double.NaN;
+			}
 			collector.emit(new Values(tfidf));
 		} catch (Exception e) {
 			logger.error("Error when calculating tf-idf", e);
 		}
 
 	}
-
 }

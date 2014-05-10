@@ -39,7 +39,6 @@ public class TfIdfExpressionTest {
 	@Test
 	public void nanWhenNoDocuments() {
 		checkTfIdf(0, 0, 0, Double.NaN);
-		checkTfIdf(Long.MAX_VALUE, 0, 0, Double.NaN);
 	}
 
 	@Test
