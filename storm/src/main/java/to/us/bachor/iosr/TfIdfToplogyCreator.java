@@ -5,7 +5,7 @@ import storm.trident.Stream;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.operation.builtin.Count;
-import storm.trident.testing.MemoryMapState;
+import storm.trident.state.StateFactory;
 import to.us.bachor.iosr.function.AddSourceField;
 import to.us.bachor.iosr.function.DocumentFetchFunction;
 import to.us.bachor.iosr.function.DocumentTokenizer;
@@ -16,6 +16,7 @@ import to.us.bachor.iosr.function.SplitAndProjectToFields;
 import to.us.bachor.iosr.function.TermFilter;
 import to.us.bachor.iosr.function.TfidfExpression;
 import to.us.bachor.iosr.spout.UrlSpout;
+import trident.cassandra.CassandraState;
 import backtype.storm.LocalDRPC;
 import backtype.storm.tuple.Fields;
 
@@ -60,20 +61,20 @@ public class TfIdfToplogyCreator {
 		TridentState dState = documentStream //
 				.each(new Fields(URL, SOURCE), new LoggingFunction("dstate"), new Fields())//
 				.groupBy(new Fields(SOURCE)) //
-				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(D_TERM));
+				.persistentAggregate(getStateFactory("d"), new Count(), new Fields(D_TERM));
 
 		// gets: term (lemmatized), documentId (document's url), source (here: "twitter")
 		// contains: df (number of appearances of the term in all documents)
 		TridentState dfState = termStream //
 				.each(new Fields(TERM, DOCUMENT_ID), new RemoveDuplicatesFilter())//
 				.groupBy(new Fields(TERM)) //
-				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(DF_TERM));
+				.persistentAggregate(getStateFactory("df"), new Count(), new Fields(DF_TERM));
 
 		// gets: documentId (document's url), term (lemmatized)
 		// contains: tf (number of appearances of the term in the document)
 		TridentState tfState = termStream //
 				.groupBy(new Fields(DOCUMENT_ID, TERM)) //
-				.persistentAggregate(new MemoryMapState.Factory(), new Count(), new Fields(TF_TERM));
+				.persistentAggregate(getStateFactory("tf"), new Count(), new Fields(TF_TERM));
 
 		/* ================================ DRPC streams ================================ */
 
@@ -92,5 +93,13 @@ public class TfIdfToplogyCreator {
 				.project(new Fields(DOCUMENT_ID, TERM, TF_IDF_RESULT));
 
 		return topology;
+	}
+
+	private StateFactory getStateFactory(String rowKey) {
+		CassandraState.Options options = new CassandraState.Options();
+		options.keyspace = "storm";
+		options.columnFamily = "tfidf";
+		options.rowKey = rowKey;
+		return CassandraState.nonTransactional("localhost", options);
 	}
 }

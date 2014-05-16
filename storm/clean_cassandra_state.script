@@ -1,0 +1,3 @@
+use storm;
+truncate tfidf;
+

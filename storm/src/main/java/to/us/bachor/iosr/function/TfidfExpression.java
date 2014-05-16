@@ -21,8 +21,9 @@ public class TfidfExpression extends BaseFunction {
 			double df = (double) tuple.getLongByField(DF_TERM);
 			double tf = (double) tuple.getLongByField(TF_TERM);
 			String term = (String) tuple.getStringByField(TERM);
-			logger.info(String.format("d=%s, df=%s, tf=%s, term=%s", d, df, tf, term));
-			double tfidf = tf * Math.log(d / (df));
+			String documentId = (String) tuple.getStringByField(DOCUMENT_ID);
+			logger.info(String.format("d=%s, df=%s, tf=%s, term=%s documentid=%s", d, df, tf, term, documentId));
+			double tfidf = tf * Math.log(d / df);
 			if (df == 0) {
 				// we haven't seen that term in any document so we can't tell anything about it
 				tfidf = Double.NaN;
