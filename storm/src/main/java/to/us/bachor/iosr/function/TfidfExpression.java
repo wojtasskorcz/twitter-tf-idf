@@ -24,11 +24,14 @@ public class TfidfExpression extends BaseFunction {
 			String documentId = (String) tuple.getStringByField(DOCUMENT_ID);
 			logger.info(String.format("d=%s, df=%s, tf=%s, term=%s documentid=%s", d, df, tf, term, documentId));
 			double tfidf = tf * Math.log(d / df);
+			if (df == 0) {
+				// we haven't seen that term in any document so we can't tell anything about it
+				tfidf = Double.NaN;
+			}
 			collector.emit(new Values(tfidf));
 		} catch (Exception e) {
 			logger.error("Error when calculating tf-idf", e);
 		}
 
 	}
-
 }
