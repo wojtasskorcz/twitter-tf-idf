@@ -11,6 +11,7 @@
 	<url>http://bachor.us.to/twitter-tf-idf</url>
 
 	<modules>
+		<module>core</module>
 		<module>storm</module>
 		<module>web</module>
 	</modules>

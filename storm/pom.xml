@@ -17,6 +17,13 @@
 	<dependencies>
 
 		<dependency>
+			<groupId>to.us.bachor.iosr</groupId>
+			<artifactId>twitter-tf-idf-core</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+
+		<dependency>
 			<groupId>storm</groupId>
 			<artifactId>storm</artifactId>
 			<version>0.9.0.1</version>
@@ -97,13 +104,16 @@
 								</filter>
 							</filters>
 							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>at.seresunit.lecturemanager_connector.App</mainClass>
 								</transformer>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 									<resource>META-INF/spring.handlers</resource>
 								</transformer>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 									<resource>META-INF/spring.schemas</resource>
 								</transformer>
 							</transformers>
