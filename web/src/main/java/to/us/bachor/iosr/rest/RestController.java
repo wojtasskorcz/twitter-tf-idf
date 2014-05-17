@@ -28,6 +28,7 @@ import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.DRPCExecutionException;
 import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.utils.DRPCClient;
+import edu.washington.cs.knowitall.morpha.MorphaStemmer;
 
 @Controller
 @RequestMapping("/")
@@ -48,13 +49,13 @@ public class RestController {
 	public @ResponseBody
 	ResponseEntity<List<String>> getFrequencies(@PathVariable String term, HttpServletRequest request)
 			throws TException, DRPCExecutionException {
+		String stemmedTerm = MorphaStemmer.stemToken(term);
 		Collection<Document> documentsToQuery = documentDao.getAllProcessedDocumentsAfterDate(new Date(1991, 1, 1));
 		List<String> result = new ArrayList<>();
 		DRPCClient client = new DRPCClient("127.0.0.1", 3772);
 		for (Document document : documentsToQuery) {
-			result.add(client.execute(TF_IDF_QUERY, document.getUrl() + " " + term));
+			result.add(client.execute(TF_IDF_QUERY, document.getUrl() + " " + stemmedTerm));
 		}
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
-
 }

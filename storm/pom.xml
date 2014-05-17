@@ -49,11 +49,7 @@
 			<artifactId>lucene-spellchecker</artifactId>
 			<version>3.6.2</version>
 		</dependency>
-		<dependency>
-			<groupId>edu.washington.cs.knowitall</groupId>
-			<artifactId>morpha-stemmer</artifactId>
-			<version>1.0.5</version>
-		</dependency>
+
 		<dependency>
 			<groupId>trident-cassandra</groupId>
 			<artifactId>trident-cassandra</artifactId>
