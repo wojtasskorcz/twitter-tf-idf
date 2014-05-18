@@ -53,7 +53,6 @@ public class TfIdfToplogyCreator {
 				.parallelismHint(1)//
 				.each(new Fields(DOCUMENT, URL), new DocumentTokenizer(), new Fields(DIRTY_TERM)) //
 				.each(new Fields(DIRTY_TERM), new TermFilter(), new Fields(TERM)) //
-				.each(new Fields(TERM, URL), new TermRegisteringFunction(), new Fields()) //
 				.project(new Fields(TERM, DOCUMENT_ID, SOURCE));
 
 		/* ================================ states ================================ */
@@ -69,6 +68,7 @@ public class TfIdfToplogyCreator {
 		// contains: df (number of appearances of the term in all documents)
 		TridentState dfState = termStream //
 				.each(new Fields(TERM, DOCUMENT_ID), new RemoveDuplicatesFilter())//
+				.each(new Fields(TERM, DOCUMENT_ID), new TermRegisteringFunction(), new Fields()) //
 				.groupBy(new Fields(TERM)) //
 				.persistentAggregate(getStateFactory("df"), new Count(), new Fields(DF_TERM));
 

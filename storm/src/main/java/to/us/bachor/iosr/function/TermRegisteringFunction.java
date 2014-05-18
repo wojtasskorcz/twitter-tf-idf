@@ -34,7 +34,7 @@ public class TermRegisteringFunction extends BaseFunction {
 	@Override
 	public void execute(TridentTuple tuple, TridentCollector collector) {
 		String term = tuple.getString(0);
-		String url = tuple.getStringByField(URL);
+		String url = tuple.getStringByField(DOCUMENT_ID);
 		Document document = documentDao.getDocumentByUrl(url);
 		termDao.addDocumentToTerm(document, term);
 		collector.emit(tuple);
