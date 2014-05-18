@@ -14,6 +14,7 @@ import to.us.bachor.iosr.function.MapGetNoNulls;
 import to.us.bachor.iosr.function.RemoveDuplicatesFilter;
 import to.us.bachor.iosr.function.SplitAndProjectToFields;
 import to.us.bachor.iosr.function.TermFilter;
+import to.us.bachor.iosr.function.TermRegisteringFunction;
 import to.us.bachor.iosr.function.TfidfExpression;
 import to.us.bachor.iosr.spout.UrlSpout;
 import trident.cassandra.CassandraState;
@@ -48,10 +49,11 @@ public class TfIdfToplogyCreator {
 
 		// gets: url, document (actual content), documentId (document's url), source (here: "twitter")
 		// emits: term (lemmatized), documentId (document's url), source (here: "twitter")
-		Stream termStream = documentStream //
-				.parallelismHint(1) //
+		Stream termStream = documentStream//
+				.parallelismHint(1)//
 				.each(new Fields(DOCUMENT, URL), new DocumentTokenizer(), new Fields(DIRTY_TERM)) //
 				.each(new Fields(DIRTY_TERM), new TermFilter(), new Fields(TERM)) //
+				.each(new Fields(TERM, URL), new TermRegisteringFunction(), new Fields()) //
 				.project(new Fields(TERM, DOCUMENT_ID, SOURCE));
 
 		/* ================================ states ================================ */
