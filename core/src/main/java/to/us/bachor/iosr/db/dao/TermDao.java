@@ -42,4 +42,9 @@ public class TermDao {
 		}
 		return dbTerm.getDocuments();
 	}
+
+	public Collection<Term> getTermsFromDocument(Document document) {
+		Query filter = new Query(Criteria.where("documents").is(document));
+		return mongoTemplate.find(filter, Term.class);
+	}
 }

@@ -21,11 +21,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import to.us.bachor.iosr.db.dao.DocumentDao;
 import to.us.bachor.iosr.db.dao.TermDao;
 import to.us.bachor.iosr.db.model.Document;
+import to.us.bachor.iosr.db.model.Term;
 import backtype.storm.generated.AlreadyAliveException;
 import backtype.storm.generated.DRPCExecutionException;
 import backtype.storm.generated.InvalidTopologyException;
@@ -60,6 +62,24 @@ public class RestController {
 		DRPCClient client = new DRPCClient("127.0.0.1", 3772);
 		for (Document document : uniqueDocumentsToQuery) {
 			result.add(client.execute(TF_IDF_QUERY, document.getUrl() + " " + stemmedTerm));
+		}
+		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "frequencies/document", method = RequestMethod.GET)
+	public @ResponseBody
+	ResponseEntity<List<String>> getFrequencies(@RequestParam("url") String url) throws TException,
+			DRPCExecutionException {
+		Document documentByUrl = documentDao.getDocumentByUrl(url);
+		List<String> result = new ArrayList<>();
+		if (documentByUrl == null) {
+			logger.info("Cannot find document with url: " + url);
+		} else {
+			Collection<Term> termsFromDocument = termDao.getTermsFromDocument(documentByUrl);
+			DRPCClient client = new DRPCClient("127.0.0.1", 3772);
+			for (Term term : termsFromDocument) {
+				result.add(client.execute(TF_IDF_QUERY, documentByUrl.getUrl() + " " + term.getTerm()));
+			}
 		}
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
