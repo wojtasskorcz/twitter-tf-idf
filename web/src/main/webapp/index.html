@@ -21,66 +21,131 @@
 
 
 <script type="text/javascript">
-
-	var showData = function(data){
-		var urlFrequencyObjects = [];
-	
-		data.forEach(function(dataElement){
-			dataElement = dataElement.split(",");
-			var url = dataElement[0].substr(3, dataElement[0].length-4).replace(/\\\//g, "/");
-			var word = dataElement[1];
-			
-			var frequency = dataElement[2].substr(0, dataElement[2].length-2);
-			
-			
-			var urlFrequencyObject = {
-				url: url,
-				frequency: frequency
-			}
-			
-			urlFrequencyObjects.push(urlFrequencyObject);
-			
-			
-			
+	var getShowDataFunction = function (isShowingDocument){
+			var showData = function(data){
+			var urlTermFrequencyObjects = [];
 		
-		});
-		
-		urlFrequencyObjects.sort(function(a,b){
-			return b.frequency - a.frequency
+			data.forEach(function(dataElement){
+				dataElement = dataElement.split(",");
+				var url = dataElement[0].substr(3, dataElement[0].length-4).replace(/\\\//g, "/");
+				var word = dataElement[1];
+				
+				var frequency = dataElement[2].substr(0, dataElement[2].length-2);
+				
+				
+				var urlTermFrequencyObject = {
+					url: url,
+					term: word,
+					frequency: frequency
+				}
+				
+				urlTermFrequencyObjects.push(urlTermFrequencyObject);
+				
+				
+				
+			
 			});
-		
-		
-		var table$ = $("#dataTable");
-		table$.empty();
-		
-		urlFrequencyObjects.forEach(function(urlFrequencyObject){
-			var tr$ = $("<tr>");
 			
-			var urlTd$ = $("<td>");
-			var frequencyTd$ = $("<td>");
-			frequencyTd$.append(urlFrequencyObject.frequency);
-			var link = $("<a>");
-			link.attr("href",urlFrequencyObject.url);
-			link.append(urlFrequencyObject.url);
-			urlTd$.append(link);
-			$(tr$).append(urlTd$);
-			$(tr$).append(frequencyTd$);
-			table$.append(tr$);
-		});
-		
-		var message$ = $("#message");
-		message$.text(urlFrequencyObjects.length + " documents found.");
-		
+			urlTermFrequencyObjects.sort(function(a,b){
+				return b.frequency - a.frequency
+				});
+			
+			
+			var table$ = $("#dataTable");
+			table$.empty();
+			
+			urlTermFrequencyObjects.forEach(function(urlTermFrequencyObject){
+				var tr$ = $("<tr>");
+				
+				var urlTd$ = $("<td>");
+				var frequencyTd$ = $("<td>");
+				frequencyTd$.append(urlTermFrequencyObject.frequency);
+				if(!isShowingDocument){
+					var showDocumentTd$ = $("<td>");
+					var showDocumentButton$ = $("<input type='button'>");
+					showDocumentButton$.val("Document statistics");
+					showDocumentButton$.on("click",getShowDocumentHandler(urlTermFrequencyObject.url));
+					$(showDocumentTd$).append(showDocumentButton$);
+					var link = $("<a>");
+					link.attr("href",urlTermFrequencyObject.url);
+					link.append(urlTermFrequencyObject.url);
+					urlTd$.append(link);
+				}else{
+					var termTd$ = $("<td>");
+					termTd$.append(urlTermFrequencyObject.term);
+				}
+
+				if(!isShowingDocument){
+					$(tr$).append(showDocumentTd$);
+					$(tr$).append(urlTd$);
+				}else{
+				    $(tr$).append(termTd$);
+				}
+				$(tr$).append(frequencyTd$);
+				table$.append(tr$);
+			});
+			
+	
+			
+
+			
+			var message$ = $("#message");
+			message$.text(urlTermFrequencyObjects.length + " results found. ");
+			
+			if(urlTermFrequencyObjects.length>0){
+				var forWhat$;
+				message$.append($("<br>"));
+				if(isShowingDocument){
+					message$.append(" Results for document: ");
+					forWhat$ = $("<a>");
+					forWhat$.attr("href", urlTermFrequencyObjects[0].url);
+					forWhat$.append(urlTermFrequencyObjects[0].url);
+				}else{
+					message$.append(" Results for term: ");
+					forWhat$ = urlTermFrequencyObjects[0].term;
+				}
+			}
+			message$.append(forWhat$);
+			
+		}
+		return showData;
+	
 	}
+
+	var showLoadingDataMessage = function(){
+		 $("#message").text("Loading data, please wait.");
+	}
+	
+	var showFailedLoadingMessage = function(){
+		$("#message").text("Loading data failed");
+	}
+	
 	
 	var getAndShowData = function(){
 		var word = $("#word").val();
+		showLoadingDataMessage();
 		$.ajax({
 			url: "rest/frequencies/"+word,
 			dataType: "json",
-			success: showData
+			success: getShowDataFunction(false),
+			error: showFailedLoadingMessage
 		});
 	}
+	
+	var getShowDocumentHandler = function(url){
+		var getAndShowDocumentData = function(){
+			showLoadingDataMessage();
+			$.ajax({
+				url: "rest/frequencies/document?"+$.param({url: url}),
+				dataType: "json",
+				success: getShowDataFunction(true),
+				error: showFailedLoadingMessage
+			});
+		}
+		return getAndShowDocumentData;
+	}
+	
+
 	
 	$("#getButton").on("click", getAndShowData);
 
