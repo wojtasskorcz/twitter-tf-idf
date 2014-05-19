@@ -20,9 +20,20 @@
 </table>
 
 
+
+
 <script type="text/javascript">
+	var disableAllInputs= function(){
+		$("input").prop("disabled", true);
+	}
+	
+	var enableAllInputs = function(){
+		$("input").prop("disabled", false);
+	}
+
 	var getShowDataFunction = function (isShowingDocument){
 			var showData = function(data){
+			enableAllInputs();
 			var urlTermFrequencyObjects = [];
 		
 			data.forEach(function(dataElement){
@@ -39,7 +50,9 @@
 					frequency: frequency
 				}
 				
-				urlTermFrequencyObjects.push(urlTermFrequencyObject);
+				if(urlTermFrequencyObject.frequency!=null && urlTermFrequencyObject.frequency!="null" && urlTermFrequencyObject.frequency>0.0){
+					urlTermFrequencyObjects.push(urlTermFrequencyObject);
+				}
 				
 				
 				
@@ -113,10 +126,12 @@
 	}
 
 	var showLoadingDataMessage = function(){
+		disableAllInputs();
 		 $("#message").text("Loading data, please wait.");
 	}
 	
 	var showFailedLoadingMessage = function(){
+		enableAllInputs();
 		$("#message").text("Loading data failed");
 	}
 	
@@ -124,6 +139,7 @@
 	var getAndShowData = function(){
 		var word = $("#word").val();
 		showLoadingDataMessage();
+
 		$.ajax({
 			url: "rest/frequencies/"+word,
 			dataType: "json",
@@ -148,6 +164,12 @@
 
 	
 	$("#getButton").on("click", getAndShowData);
+	
+	$("#word").keyup(function(event){
+		if(event.keyCode == 13){
+			$("#getButton").click();
+		}
+	});
 
 </script>
 
