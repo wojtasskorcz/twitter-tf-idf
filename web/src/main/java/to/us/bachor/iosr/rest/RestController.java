@@ -7,6 +7,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -51,35 +56,90 @@ public class RestController {
 
 	private static final Logger logger = Logger.getLogger(RestController.class);
 
+	private <T> List<List<T>> splitListEvenly(List<T> list, int parts) {
+		List<List<T>> result = new ArrayList<>();
+		for (int i = 0; i < parts; ++i) {
+			result.add(new ArrayList<T>());
+		}
+		for (int i = 0; i < list.size(); ++i) {
+			result.get(i % parts).add(list.get(i));
+		}
+		return result;
+	}
+
+	private class DRPCQueriesExecutor implements Callable<List<String>> {
+
+		private List<String> queries;
+		private String function;
+
+		public DRPCQueriesExecutor(String function, List<String> queries) {
+			this.queries = queries;
+			this.function = function;
+		}
+
+		@Override
+		public List<String> call() throws Exception {
+			DRPCClient client = new DRPCClient("127.0.0.1", 3772);
+			List<String> result = new ArrayList<>();
+			for (String query : queries) {
+				result.add(client.execute(function, query));
+			}
+			return result;
+		}
+	}
+
+	private List<String> executeDRPCQueriesInParallel(String function, List<String> queries)
+			throws InterruptedException {
+		List<String> result = new ArrayList<>();
+
+		int threads = Runtime.getRuntime().availableProcessors();
+		List<List<String>> parts = splitListEvenly(queries, threads);
+		List<Callable<List<String>>> tasks = new ArrayList<>();
+		for (List<String> part : parts) {
+			tasks.add(new DRPCQueriesExecutor(function, part));
+		}
+		ExecutorService executorService = Executors.newFixedThreadPool(threads);
+		List<Future<List<String>>> futures = executorService.invokeAll(tasks);
+		for (Future<List<String>> future : futures) {
+			try {
+				result.addAll(future.get());
+			} catch (ExecutionException e) {
+				logger.error(e);
+			}
+		}
+		return result;
+	}
+
 	@RequestMapping(value = "frequencies/{term}", method = RequestMethod.GET)
 	public @ResponseBody
 	ResponseEntity<List<String>> getFrequencies(@PathVariable String term, HttpServletRequest request)
-			throws TException, DRPCExecutionException {
+			throws TException, DRPCExecutionException, InterruptedException {
 		String stemmedTerm = MorphaStemmer.stemToken(term);
 		Collection<Document> documentsToQuery = termDao.getDocumentsContainingTerm(stemmedTerm);
 		Set<Document> uniqueDocumentsToQuery = new HashSet<>(documentsToQuery);
-		List<String> result = new ArrayList<>();
-		DRPCClient client = new DRPCClient("127.0.0.1", 3772);
+		List<String> queries = new ArrayList<>();
 		for (Document document : uniqueDocumentsToQuery) {
-			result.add(client.execute(TF_IDF_QUERY, document.getUrl() + " " + stemmedTerm));
+			queries.add(document.getUrl() + " " + stemmedTerm);
 		}
+		List<String> result = executeDRPCQueriesInParallel(TF_IDF_QUERY, queries);
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "frequencies/document", method = RequestMethod.GET)
 	public @ResponseBody
 	ResponseEntity<List<String>> getFrequencies(@RequestParam("url") String url) throws TException,
-			DRPCExecutionException {
-		Document documentByUrl = documentDao.getDocumentByUrl(url);
+			DRPCExecutionException, InterruptedException {
 		List<String> result = new ArrayList<>();
+		Document documentByUrl = documentDao.getDocumentByUrl(url);
 		if (documentByUrl == null) {
 			logger.info("Cannot find document with url: " + url);
 		} else {
 			Collection<Term> termsFromDocument = termDao.getTermsFromDocument(documentByUrl);
-			DRPCClient client = new DRPCClient("127.0.0.1", 3772);
+			List<String> queries = new ArrayList<>();
 			for (Term term : termsFromDocument) {
-				result.add(client.execute(TF_IDF_QUERY, documentByUrl.getUrl() + " " + term.getTerm()));
+				queries.add(documentByUrl.getUrl() + " " + term.getTerm());
 			}
+			result = executeDRPCQueriesInParallel(TF_IDF_QUERY, queries);
 		}
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
