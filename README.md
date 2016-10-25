@@ -1,6 +1,8 @@
 twitter-tf-idf
 ==============
 
+A distributed service measuring tf-idf metrics of tweets. The tweets are retrieved using Twitter's Streaming API by subscribing to a topic. The collected data is processed using an Apache Storm cluster.
+
 ### Running Storm cluster
 
 Storm uses Zookeeper for coordinating the cluster. You can find installation guide for a standalone Zookeeper cluster [here](http://zookeeper.apache.org/doc/r3.3.3/zookeeperStarted.html#sc_InstallingSingleMode).
